@@ -1,15 +1,37 @@
 % simulate mouse behavior in belief state foraging task to determine optimality
 % last edits MB 6-5-19, 7pm
 
+function [simResults, i] = simulation_beliefStateForaging(x)
+
+    % x(1) = mean rew dist
+    % x(2) = std rew dist
+    % x(3) = mean ITI
+    % x(4) = fraction track 2 (probe and non-probe)
+    % x(5) = fraction probe (of track 2)
+
 %% task variables we can vary:
-meanITI = 8; % mean seconds for inter-trial interval (does not account for mouse taking longer than that to trigger new trial by stopping)
-rewDistribution = [20 120 400 40]; % [min mean max std] - distribution for reward locations
+meanITI = x(3); % 8; % mean seconds for inter-trial interval (does not account for mouse taking longer than that to trigger new trial by stopping)
+%rewDistribution = [20 120 400 40]; % [min mean max std] - distribution for reward locations
+rewDistribution = [max(10, x(1) - 5*x(2)), ...
+                  x(1), ...
+                  min(1000, x(1) + 5*x(2)), ...
+                  x(2)]; % [min mean max std] - distribution for reward locations
+rewDistribution
 
 % set of trials types: 1 = track 1, 2 = track 2 non-probes, 3 = track2 probe (no reward)
-trialSet = [1 1 1 1 1 ...
-    1 1 1 1 1 ...
-    2 2 2 2 2 ...
-    2 2 3 3 3];
+%trialSet = [1 1 1 1 1 ...
+%    1 1 1 1 1 ...
+%    2 2 2 2 2 ...
+%    2 2 3 3 3];
+n = 100;
+n_tr1 = round(n * (1 - x(4)));
+n_tr2_npr = round(n * x(4) * (1 - x(5)));
+n_tr2_pr = round(n * x(4) * x(5));
+trialSet = [ones(1, n_tr1), ...
+            ones(1, n_tr2_npr) * 2, ...
+            ones(1, n_tr2_pr) * 3];
+
+trialSet
 
 %% distances to test:
 track2maxRun = [10:10:300]; % distances to try for how far mouse is willing to run on track 2 before quiting
@@ -24,7 +46,7 @@ rewTotal = 0; % track rews earned throughout simulation
 timeTotal = 0; % keep track of 'time elapsed' in simulated sessions
 rewLocation = 0; % value drawn from probabilistic distribution on each trial - location of reward on a given trial
 numSims = length(track2maxRun);
-simResults = zeros(length(track2maxRun),2);
+simResults = zeros(length(track2maxRun),3);
 
 numTrials = 100000;
 
@@ -33,6 +55,9 @@ for iSim = 1:numSims
     rewTotal = 0; % reset at beginning of each simulation
     timeTotal = 0;
     trialIndx = 1;
+
+    nprs = 0; % # of non-probe trials
+    npr_rews = 0; % # of rewarded non-probe trials
     
     for iTrial = 1:numTrials
         
@@ -53,11 +78,14 @@ for iSim = 1:numSims
                 rewTotal = rewTotal + 1;
                 timeTotal = timeTotal + rewLocation/speed;
             case 2
+                nprs = nprs + 1;
+
                 if rewLocation > track2maxRun(iSim)
                     timeTotal = timeTotal + track2maxRun(iSim)/speed + stopTime;
                     
                 else
                     rewTotal = rewTotal + 1;
+                    npr_rews = npr_rews + 1;
                     timeTotal = timeTotal + rewLocation/speed;
                 end
             case 3
@@ -74,7 +102,7 @@ for iSim = 1:numSims
         
     end
     
-    simResults(iSim,:) = [track2maxRun(iSim) rewTotal/timeTotal];
+    simResults(iSim,:) = [track2maxRun(iSim) rewTotal/timeTotal npr_rews/nprs];
     
 end
 
@@ -82,6 +110,7 @@ display(simResults)
 figure;
 plot(simResults(:,1),simResults(:,2))
 
+%{
 try
 dist_maxRew = [simResults(find(simResults(:,2)==max(simResults(:,2)))-1,1) simResults(find(simResults(:,2)==max(simResults(:,2)))-1,2); ...
     simResults(find(simResults(:,2)==max(simResults(:,2))),1) simResults(find(simResults(:,2)==max(simResults(:,2))),2); ...
@@ -90,5 +119,8 @@ catch
     dist_maxRew = [simResults(find(simResults(:,2)==max(simResults(:,2))),1) simResults(find(simResults(:,2)==max(simResults(:,2))),2)];
 end
 display(dist_maxRew)
+%}
+
+[~,i] = max(simResults(:,2));
 
 % have it spit out what % trials would be lower distance
