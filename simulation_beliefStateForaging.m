@@ -3,6 +3,8 @@
 
 function [simResults, i] = simulation_beliefStateForaging(x)
 
+    rng default; % for reproducibility 
+
     % example: [simResults, i] = simulation_beliefStateForaging([120 40 8 0.5 0.3])
     %
     % x(1) = mean rew dist
@@ -106,12 +108,10 @@ for iSim = 1:numSims
     
 end
 
-%{
 display(simResults)
 figure;
 plot(simResults(:,1),simResults(:,2))
 
-%}
 
 [~,i] = max(simResults(:,2));
 
