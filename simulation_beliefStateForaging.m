@@ -3,6 +3,8 @@
 
 function [simResults, i] = simulation_beliefStateForaging(x)
 
+    % example: [simResults, i] = simulation_beliefStateForaging([120 40 8 0.5 0.3])
+    %
     % x(1) = mean rew dist
     % x(2) = std rew dist
     % x(3) = mean ITI
@@ -16,7 +18,6 @@ rewDistribution = [max(10, x(1) - 5*x(2)), ...
                   x(1), ...
                   min(1000, x(1) + 5*x(2)), ...
                   x(2)]; % [min mean max std] - distribution for reward locations
-rewDistribution
 
 % set of trials types: 1 = track 1, 2 = track 2 non-probes, 3 = track2 probe (no reward)
 %trialSet = [1 1 1 1 1 ...
@@ -31,7 +32,6 @@ trialSet = [ones(1, n_tr1), ...
             ones(1, n_tr2_npr) * 2, ...
             ones(1, n_tr2_pr) * 3];
 
-trialSet
 
 %% distances to test:
 track2maxRun = [10:10:300]; % distances to try for how far mouse is willing to run on track 2 before quiting
@@ -106,21 +106,12 @@ for iSim = 1:numSims
     
 end
 
+%{
 display(simResults)
 figure;
 plot(simResults(:,1),simResults(:,2))
 
-%{
-try
-dist_maxRew = [simResults(find(simResults(:,2)==max(simResults(:,2)))-1,1) simResults(find(simResults(:,2)==max(simResults(:,2)))-1,2); ...
-    simResults(find(simResults(:,2)==max(simResults(:,2))),1) simResults(find(simResults(:,2)==max(simResults(:,2))),2); ...
-    simResults(find(simResults(:,2)==max(simResults(:,2)))+1,1) simResults(find(simResults(:,2)==max(simResults(:,2)))+1,2)];
-catch
-    dist_maxRew = [simResults(find(simResults(:,2)==max(simResults(:,2))),1) simResults(find(simResults(:,2)==max(simResults(:,2))),2)];
-end
-display(dist_maxRew)
 %}
 
 [~,i] = max(simResults(:,2));
 
-% have it spit out what % trials would be lower distance
