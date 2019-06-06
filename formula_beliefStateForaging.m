@@ -1,6 +1,7 @@
-function [simResults, i] = formula_beliefStateForaging(x)
+function [simResults, i] = formula_beliefStateForaging(x, do_plot)
 
-    % [simResults, i] = formula_beliefStateForaging([120 40 8 0.5 0.3])
+    % example:
+    % [simResults, i] = formula_beliefStateForaging([120 40 8 0.5 0.3], true)
     %
     % x(1) = mean rew dist
     % x(2) = std rew dist
@@ -9,10 +10,10 @@ function [simResults, i] = formula_beliefStateForaging(x)
     % x(5) = fraction probe (of track 2)
 
 
-n = 100000; % total # of trials
-n_tr1 = round(n * (1 - x(4))); % # of track 1 trials
-n_tr2_npr = round(n * x(4) * (1 - x(5))); % # of track 2 non-probe trials
-n_tr2_pr = round(n * x(4) * x(5)); % # of track 2 probe trials
+n = 1; % total # of trials TODO remove -- it's fractions now; it's a precise answer
+n_tr1 = n * (1 - x(4)); % # of track 1 trials
+n_tr2_npr = n * x(4) * (1 - x(5)); % # of track 2 non-probe trials
+n_tr2_pr = n * x(4) * x(5); % # of track 2 probe trials
 
 meanITI = x(3);
 mu = x(1); % mean of rew dist
@@ -46,8 +47,11 @@ for iSim = 1:length(track2maxRun)
     simResults(iSim,3) = frac_rew_npr;
 end
 
-display(simResults)
-figure;
-plot(simResults(:,1),simResults(:,2))
+
+if do_plot
+    display(simResults)
+    figure;
+    plot(simResults(:,1),simResults(:,2))
+end
 
 [~,i] = max(simResults(:,2));

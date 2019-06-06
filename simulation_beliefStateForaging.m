@@ -1,11 +1,11 @@
 % simulate mouse behavior in belief state foraging task to determine optimality
 % last edits MB 6-5-19, 7pm
 
-function [simResults, i] = simulation_beliefStateForaging(x)
+function [simResults, i] = simulation_beliefStateForaging(x, do_plot)
 
     rng default; % for reproducibility 
 
-    % example: [simResults, i] = simulation_beliefStateForaging([120 40 8 0.5 0.3])
+    % example: [simResults, i] = simulation_beliefStateForaging([120 40 8 0.5 0.3], true)
     %
     % x(1) = mean rew dist
     % x(2) = std rew dist
@@ -108,9 +108,12 @@ for iSim = 1:numSims
     
 end
 
-display(simResults)
-figure;
-plot(simResults(:,1),simResults(:,2))
+
+if do_plot
+    display(simResults)
+    figure;
+    plot(simResults(:,1),simResults(:,2))
+end
 
 
 [~,i] = max(simResults(:,2));

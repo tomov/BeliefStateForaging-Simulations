@@ -4,11 +4,11 @@
 % x(4) = fraction track 2 (probe and non-probe)
 % x(5) = fraction probe (of track 2)
 
-x0 = [120 40 8 0.5 0.3];
-lb = [50 5 1 0.2 0.1];
-ub = [250 250 20 0.7 0.9];
+x0 = [120 40 8 0.5 0.3]; % initial condition
+lb = [50 5 1 0.2 0.1]; % lower bounds
+ub = [250 250 20 0.7 0.9]; % upper bounds
 
-options = optimset('Display','off');
-[x] = fmincon(@cost_beliefStateForaging,x0,[],[],[],[],lb,ub,[],options);
+%options = optimset('Display','off');
+[x] = fmincon(@cost_beliefStateForaging,x0,[],[],[],[],lb,ub,[]);
 
 save fit.mat
