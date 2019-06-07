@@ -19,12 +19,12 @@ meanITI = x(3);
 mu = x(1); % mean of rew dist
 sigma = x(2); % std of rew dist
 
-min_dist = max(1, mu - 5 * sigma);
-max_dist = min(1000, mu + 5 * sigma);
+min_dist = 20;
+max_dist = 500;
 
 speed = 5; % AU per second
 
-track2maxRun = [10:10:300]; % distances to try for how far mouse is willing to run on track 2 before quiting
+track2maxRun = [10:10:600]; % distances to try for how far mouse is willing to run on track 2 before quiting
 
 
 for iSim = 1:length(track2maxRun)
@@ -50,9 +50,9 @@ for iSim = 1:length(track2maxRun)
     % total time = ITIs + track 1 times + ...
     total_time = n * meanITI + (mu_tr1 / speed) * n_tr1;
     total_time = total_time + (mu_tr2_npr_rew / speed) * frac_rew_npr * n_tr2_npr; %  ... +  track 2 rewarded times 
-    total_time = total_time + stop_dist / speed * ((1 - frac_rew_npr) * n_tr2_npr + n_tr2_pr); % ... + track 2 non-rewarded times
+    total_time = total_time + (1 + stop_dist / speed) * ((1 - frac_rew_npr) * n_tr2_npr + n_tr2_pr); % ... + track 2 non-rewarded times, accounting for the 1-second stop time
 
-    simResults(iSim,1) = iSim;
+    simResults(iSim,1) = stop_dist;
     simResults(iSim,2) = total_rew / total_time;
     simResults(iSim,3) = frac_rew_npr;
 end

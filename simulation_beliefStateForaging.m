@@ -16,9 +16,9 @@ function [simResults, i] = simulation_beliefStateForaging(x, do_plot)
 %% task variables we can vary:
 meanITI = x(3); % 8; % mean seconds for inter-trial interval (does not account for mouse taking longer than that to trigger new trial by stopping)
 %rewDistribution = [20 120 400 40]; % [min mean max std] - distribution for reward locations
-rewDistribution = [max(10, x(1) - 5*x(2)), ...
+rewDistribution = [20, ...
                   x(1), ...
-                  min(1000, x(1) + 5*x(2)), ...
+                  500, ...
                   x(2)]; % [min mean max std] - distribution for reward locations
 
 % set of trials types: 1 = track 1, 2 = track 2 non-probes, 3 = track2 probe (no reward)
@@ -36,7 +36,7 @@ trialSet = [ones(1, n_tr1), ...
 
 
 %% distances to test:
-track2maxRun = [10:10:300]; % distances to try for how far mouse is willing to run on track 2 before quiting
+track2maxRun = [10:10:600]; % distances to try for how far mouse is willing to run on track 2 before quiting
 
 %% 'measured' mouse variables (also relevant is time it takes them to stop and initiate new trial, though this would just be factored into ITI for scope of this simulation)
 speed = 5; % AU per second
