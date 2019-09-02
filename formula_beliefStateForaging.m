@@ -11,10 +11,9 @@ function [simResults, i] = formula_beliefStateForaging(x, do_plot)
     % x(5) = fraction probe (of track 2)
 
 
-n = 1; % total # of trials TODO remove -- it's fractions now; it's a precise answer
-n_tr1 = n * (1 - x(4)); % # of track 1 trials
-n_tr2_npr = n * x(4) * (1 - x(5)); % # of track 2 non-probe trials
-n_tr2_pr = n * x(4) * x(5); % # of track 2 probe trials
+n_tr1 = 1 - x(4); % fraction of track 1 trials
+n_tr2_npr = x(4) * (1 - x(5)); % fraction of track 2 non-probe trials
+n_tr2_pr = x(4) * x(5); % fraction of track 2 probe trials
 
 meanITI = x(3);
 mu = x(1); % mean of rew dist
@@ -32,19 +31,21 @@ for iSim = 1:length(track2maxRun)
     
     stop_dist = track2maxRun(iSim); % how far to run on track 2
 
-    frac_rew_npr = rewdist_norm_cdf(stop_dist, min_dist, mu, max_dist, sigma); % fraction of rewarded track 2 non-probe trials (i.e. that have reward before stop_dist)
+    %frac_rew_npr = rewdist_norm_cdf(stop_dist, min_dist, mu, max_dist, sigma); % fraction of rewarded track 2 non-probe trials (i.e. that have reward before stop_dist)
 
-    mu_tr1 = rewdist_norm_mu(min_dist, mu, max_dist, sigma); % mean reward distance for track 1
-    mu_tr2_npr_rew = rewdist_norm_mu(min_dist, mu, min(max_dist, stop_dist), sigma); % mean reward distance for track 2 rewarded trials; stop distance taken into account
+    %mu_tr1 = rewdist_norm_mu(min_dist, mu, max_dist, sigma); % mean reward distance for track 1
+    %mu_tr2_npr_rew = rewdist_norm_mu(min_dist, mu, min(max_dist, stop_dist), sigma); % mean reward distance for track 2 rewarded trials; stop distance taken into account
 
-    mu_tr2_npr_rew
+    frac_rew_npr = rewdist_unif_cdf(stop_dist, min_dist, max_dist); % fraction of rewarded track 2 non-probe trials (i.e. that have reward before stop_dist)
+    mu_tr1 = rewdist_unif_mu(min_dist, max_dist); % mean reward distance for track 1
+    mu_tr2_npr_rew = rewdist_unif_mu(min_dist, min(max_dist, stop_dist)); % mean reward distance for track 2 rewarded trials; stop distance taken into account
 
 
     % total reward = track 1 + track 2
     total_rew = 1 * n_tr1 + 1 * frac_rew_npr * n_tr2_npr;
 
     % total time = ITIs + track 1 times + ...
-    total_time = n * meanITI + (mu_tr1 / speed) * n_tr1;
+    total_time = meanITI + (mu_tr1 / speed) * n_tr1;
     total_time = total_time + (mu_tr2_npr_rew / speed) * frac_rew_npr * n_tr2_npr; %  ... +  track 2 rewarded times 
     total_time = total_time + (1 + stop_dist / speed) * ((1 - frac_rew_npr) * n_tr2_npr + n_tr2_pr); % ... + track 2 non-rewarded times, accounting for the 1-second stop time
 

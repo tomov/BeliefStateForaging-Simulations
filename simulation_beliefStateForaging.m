@@ -65,15 +65,12 @@ for iSim = 1:numSims
     for iTrial = 1:numTrials
         
         track = trialSet(trialIndx);
-        
-        % draw reward location from pseudo-normal distribution        
-        if track==1 || track==2
-            rewLocation = rewDistribution(2) + rewDistribution(4) * randn(1);
-            % loop until rewLocation is within the min/max of rewDistribution
-            while rewLocation < rewDistribution(1) || rewLocation > rewDistribution(3)
-                rewLocation = rewDistribution(2) + rewDistribution(4) * randn(1);
-            end
-        end
+       
+        % draw reward location 
+        if track==1 || track==2 
+            %rewLocation = rewdist_norm_rnd(rewDistribution(1), rewDistribution(2), rewDistribution(3), rewDistribution(4));
+            rewLocation = rewdist_unif_rnd(rewDistribution(1), rewDistribution(3));
+        end 
         
         % determine trial result and track changes in rewards and time
         switch track
