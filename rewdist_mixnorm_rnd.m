@@ -1,4 +1,4 @@
-function d = rewdist_multinorm_rnd(min_dist, mus, max_dist, sigmas, w)
+function d = rewdist_mixnorm_rnd(min_dist, mus, max_dist, sigmas, w)
 
     % draw from mixture of truncated normals, weighted by w
 

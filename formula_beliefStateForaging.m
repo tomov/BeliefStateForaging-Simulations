@@ -26,7 +26,7 @@ speed = 5; % AU per second
 
 track2maxRun = [10:10:600]; % distances to try for how far mouse is willing to run on track 2 before quiting
 
-distr = 'unif'; % what kind of reward distribution to use
+distr = 'mixnorm'; % what kind of reward distribution to use
 
 switch distr
     case 'norm'
@@ -40,6 +40,15 @@ switch distr
         cdf = @(d) rewdist_unif_cdf(d, min_dist, max_dist);
         rnd = @() rewdist_unif_rnd(min_dist, max_dist);
         mea = @(maxd) rewdist_unif_mu(min_dist, maxd);
+
+    case 'mixnorm'
+        mus = [50 140 250];
+        sigmas = [20 20 20];
+        w = [1 2 3];
+        pdf = @(d) rewdist_mixnorm_pdf(d, min_dist, mus, max_dist, sigmas, w);
+        cdf = @(d) rewdist_mixnorm_cdf(d, min_dist, mus, max_dist, sigmas, w);
+        rnd = @() rewdist_mixnorm_rnd(min_dist, mus, max_dist, sigmas, w);
+        mea = @(maxd) rewdist_mixnorm_mu(min_dist, mus, maxd, sigmas, w);
 
     otherwise
         assert(false);
