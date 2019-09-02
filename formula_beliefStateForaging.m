@@ -26,7 +26,7 @@ max_dist = 500;
 
 speed = 5; % AU per second
 
-track2maxRun = [10:10:600]; % distances to try for how far mouse is willing to run on track 2 before quiting
+track2maxRun = [10:1:600]; % distances to try for how far mouse is willing to run on track 2 before quiting
 
 distr = 'mixnorm'; % what kind of reward distribution to use
 
@@ -45,8 +45,8 @@ switch distr
 
     case 'mixnorm'
         mus = [50 140 250];
-        sigmas = [20 20 20];
-        w = [1 2 3];
+        sigmas = [10 10 10];
+        w = [3 2 1];
         pdf = @(d) rewdist_mixnorm_pdf(d, min_dist, mus, max_dist, sigmas, w);
         cdf = @(d) rewdist_mixnorm_cdf(d, min_dist, mus, max_dist, sigmas, w);
         rnd = @() rewdist_mixnorm_rnd(min_dist, mus, max_dist, sigmas, w);
@@ -91,7 +91,13 @@ end
 
 simResults(:,4) = pdf(simResults(:,1));
 simResults(:,5) = cdf(simResults(:,1));
-simResults(:,6) = (1 - cdf(simResults(:,1))) * frac_pr; % unnormalized belief state = P(no rew by d | rew trial) * P(rew trial) = (1 - P(rew by d | rew trial) * P(rew trial)
+
+% belief state = P(probe | no rew by d) 
+%              = P(no rew by d | probe) P(probe) / (P(no rew by d | probe) P(probe) + P(no rew by d | non probe) P(non probe))
+%              = 1 * frac_pr / (1 * frac_pr + (1 - P(rew by d | non probe)) * (1 - frac_pr))
+%              = 1 * frac_pr / (1 * frac_pr + CDF(d) * (1 - frac_pr))
+simResults(:,6) = frac_pr ./ (frac_pr + (1 - cdf(simResults(:,1))) * (1 - frac_pr));
+
 
 
 if do_plot
@@ -120,7 +126,7 @@ if do_plot
     subplot(4,1,4);
     plot(simResults(:,1),simResults(:,6));
     xlabel('distance');
-    ylabel('unnormalized P(rew trial | no rew by d)');
+    ylabel('P(probe | no rew by distance)');
     title('Belief state');
 
 end
