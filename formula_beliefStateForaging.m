@@ -26,6 +26,26 @@ speed = 5; % AU per second
 
 track2maxRun = [10:10:600]; % distances to try for how far mouse is willing to run on track 2 before quiting
 
+distr = 'unif'; % what kind of reward distribution to use
+
+switch distr
+    case 'norm'
+        pdf = @(d) rewdist_norm_pdf(d, min_dist, mu, max_dist, sigma);
+        cdf = @(d) rewdist_norm_cdf(d, min_dist, mu, max_dist, sigma);
+        rnd = @() rewdist_norm_rnd(min_dist, mu, max_dist, sigma);
+        mea = @(maxd) rewdist_norm_mu(min_dist, mu, maxd, sigma);
+
+    case 'unif'
+        pdf = @(d) rewdist_unif_pdf(d, min_dist, max_dist);
+        cdf = @(d) rewdist_unif_cdf(d, min_dist, max_dist);
+        rnd = @() rewdist_unif_rnd(min_dist, max_dist);
+        mea = @(maxd) rewdist_unif_mu(min_dist, maxd);
+
+    otherwise
+        assert(false);
+end
+
+
 
 for iSim = 1:length(track2maxRun)
     
@@ -36,9 +56,13 @@ for iSim = 1:length(track2maxRun)
     %mu_tr1 = rewdist_norm_mu(min_dist, mu, max_dist, sigma); % mean reward distance for track 1
     %mu_tr2_npr_rew = rewdist_norm_mu(min_dist, mu, min(max_dist, stop_dist), sigma); % mean reward distance for track 2 rewarded trials; stop distance taken into account
 
-    frac_rew_npr = rewdist_unif_cdf(stop_dist, min_dist, max_dist); % fraction of rewarded track 2 non-probe trials (i.e. that have reward before stop_dist)
-    mu_tr1 = rewdist_unif_mu(min_dist, max_dist); % mean reward distance for track 1
-    mu_tr2_npr_rew = rewdist_unif_mu(min_dist, min(max_dist, stop_dist)); % mean reward distance for track 2 rewarded trials; stop distance taken into account
+    %frac_rew_npr = rewdist_unif_cdf(stop_dist, min_dist, max_dist); % fraction of rewarded track 2 non-probe trials (i.e. that have reward before stop_dist)
+    %mu_tr1 = rewdist_unif_mu(min_dist, max_dist); % mean reward distance for track 1
+    %mu_tr2_npr_rew = rewdist_unif_mu(min_dist, min(max_dist, stop_dist)); % mean reward distance for track 2 rewarded trials; stop distance taken into account
+
+    frac_rew_npr = cdf(stop_dist); % fraction of rewarded track 2 non-probe trials (i.e. that have reward before stop_dist)
+    mu_tr1 = mea(max_dist); % mean reward distance for track 1
+    mu_tr2_npr_rew = mea(min(max_dist, stop_dist)); % mean reward distance for track 2 rewarded trials; stop distance taken into account
 
 
     % total reward = track 1 + track 2

@@ -16,11 +16,30 @@ function [simResults, i] = simulation_beliefStateForaging(x, do_plot)
 
 %% task variables we can vary:
 meanITI = x(3); % 8; % mean seconds for inter-trial interval (does not account for mouse taking longer than that to trigger new trial by stopping)
-%rewDistribution = [20 120 400 40]; % [min mean max std] - distribution for reward locations
-rewDistribution = [20, ...
-                  x(1), ...
-                  500, ...
-                  x(2)]; % [min mean max std] - distribution for reward locations
+mu = x(1); % mean of rew dist
+sigma = x(2); % std of rew dist
+
+min_dist = 20;
+max_dist = 500;
+
+distr = 'unif'; % what kind of reward distribution to use
+
+switch distr
+    case 'norm'
+        pdf = @(d) rewdist_norm_pdf(d, min_dist, mu, max_dist, sigma);
+        cdf = @(d) rewdist_norm_cdf(d, min_dist, mu, max_dist, sigma);
+        rnd = @() rewdist_norm_rnd(min_dist, mu, max_dist, sigma);
+        mea = @(maxd) rewdist_norm_mu(min_dist, mu, maxd, sigma);
+
+    case 'unif'
+        pdf = @(d) rewdist_unif_pdf(d, min_dist, max_dist);
+        cdf = @(d) rewdist_unif_cdf(d, min_dist, max_dist);
+        rnd = @() rewdist_unif_rnd(min_dist, max_dist);
+        mea = @(maxd) rewdist_unif_mu(min_dist, maxd);
+
+    otherwise
+        assert(false);
+end
 
 % set of trials types: 1 = track 1, 2 = track 2 non-probes, 3 = track2 probe (no reward)
 %trialSet = [1 1 1 1 1 ...
@@ -68,8 +87,7 @@ for iSim = 1:numSims
        
         % draw reward location 
         if track==1 || track==2 
-            %rewLocation = rewdist_norm_rnd(rewDistribution(1), rewDistribution(2), rewDistribution(3), rewDistribution(4));
-            rewLocation = rewdist_unif_rnd(rewDistribution(1), rewDistribution(3));
+            rewLocation = rnd();
         end 
         
         % determine trial result and track changes in rewards and time
