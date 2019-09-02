@@ -22,7 +22,7 @@ sigma = x(2); % std of rew dist
 min_dist = 20;
 max_dist = 500;
 
-distr = 'unif'; % what kind of reward distribution to use
+distr = 'norm'; % what kind of reward distribution to use
 
 switch distr
     case 'norm'
@@ -124,11 +124,25 @@ for iSim = 1:numSims
     
 end
 
+simResults(:,4) = pdf(simResults(:,1));
+
 
 if do_plot
-    display(simResults)
-    figure;
-    plot(simResults(:,1),simResults(:,2))
+    %display(simResults)
+    figure; 
+
+    subplot(2,1,1);
+    plot(simResults(:,1),simResults(:,2));
+    title('Expected reward given policy');
+    xlabel('Stop distance');
+    ylabel('Expected reward');
+    
+    subplot(2,1,2);
+    plot(simResults(:,1),simResults(:,4));
+    xlabel('distance');
+    ylabel('probability density');
+    title('Reward location PDF');
+
 end
 
 

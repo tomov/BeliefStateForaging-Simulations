@@ -78,11 +78,25 @@ for iSim = 1:length(track2maxRun)
     simResults(iSim,3) = frac_rew_npr;
 end
 
+simResults(:,4) = pdf(simResults(:,1));
+
 
 if do_plot
     %display(simResults)
-    figure;
+    figure; 
+
+    subplot(2,1,1);
     plot(simResults(:,1),simResults(:,2));
+    title('Expected reward given policy');
+    xlabel('Stop distance');
+    ylabel('Expected reward');
+    
+    subplot(2,1,2);
+    plot(simResults(:,1),simResults(:,4));
+    xlabel('distance');
+    ylabel('probability density');
+    title('Reward location PDF');
+
 end
 
 [~,i] = max(simResults(:,2));
