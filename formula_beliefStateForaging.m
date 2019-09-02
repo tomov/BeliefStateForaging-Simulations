@@ -2,6 +2,7 @@ function [simResults, i] = formula_beliefStateForaging(x, do_plot)
 
     % example:
     % [simResults, i] = formula_beliefStateForaging([120 40 8 0.5 0.3], true)
+    % [simResults, i] = formula_beliefStateForaging([140 80 8 0.7 0.2], true)
     %
     % x(1) = mean rew dist
     % x(2) = std rew dist
@@ -31,17 +32,12 @@ for iSim = 1:length(track2maxRun)
     
     stop_dist = track2maxRun(iSim); % how far to run on track 2
 
-    frac_rew_npr = normcdf(stop_dist, mu, sigma); % fraction of rewarded track 2 non-probe trials (i.e. that have reward before stop_dist)
+    frac_rew_npr = rewdist_norm_cdf(stop_dist, min_dist, mu, max_dist, sigma); % fraction of rewarded track 2 non-probe trials (i.e. that have reward before stop_dist)
 
-    % mean of truncated gaussian -- see Moments in https://en.wikipedia.org/wiki/Truncated_normal_distribution 
-    % track 1
-    alpha = (min_dist - mu) / sigma;
-    beta = (max_dist - mu) / sigma;
-    mu_tr1 = mu + sigma * (normpdf(alpha) - normpdf(beta)) / (normcdf(beta) - normcdf(alpha));
-    % track 2
-    alpha = (min_dist - mu) / sigma;
-    beta = (min(max_dist, stop_dist) - mu) / sigma; % stop distance taken into account
-    mu_tr2_npr_rew = mu + sigma * (normpdf(alpha) - normpdf(beta)) / (normcdf(beta) - normcdf(alpha));  % mean reward distance for track 2 rewarded trials
+    mu_tr1 = rewdist_norm_mu(min_dist, mu, max_dist, sigma); % mean reward distance for track 1
+    mu_tr2_npr_rew = rewdist_norm_mu(min_dist, mu, min(max_dist, stop_dist), sigma); % mean reward distance for track 2 rewarded trials; stop distance taken into account
+
+    mu_tr2_npr_rew
 
 
     % total reward = track 1 + track 2
@@ -59,9 +55,9 @@ end
 
 
 if do_plot
-    display(simResults)
+    %display(simResults)
     figure;
-    plot(simResults(:,1),simResults(:,2))
+    plot(simResults(:,1),simResults(:,2));
 end
 
 [~,i] = max(simResults(:,2));

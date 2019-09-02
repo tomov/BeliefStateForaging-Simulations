@@ -6,6 +6,7 @@ function [simResults, i] = simulation_beliefStateForaging(x, do_plot)
     rng default; % for reproducibility 
 
     % example: [simResults, i] = simulation_beliefStateForaging([120 40 8 0.5 0.3], true)
+    %          [simResults, i] = simulation_beliefStateForaging([140 80 8 0.7 0.2], true)
     %
     % x(1) = mean rew dist
     % x(2) = std rew dist
