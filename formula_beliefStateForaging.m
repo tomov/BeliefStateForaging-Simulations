@@ -12,6 +12,8 @@ function [simResults, i] = formula_beliefStateForaging(x, do_plot)
 
 
 n_tr1 = 1 - x(4); % fraction of track 1 trials
+n_tr2 = x(4); % fraction of track 2 trials
+frac_pr = x(5); % fraction probe
 n_tr2_npr = x(4) * (1 - x(5)); % fraction of track 2 non-probe trials
 n_tr2_pr = x(4) * x(5); % fraction of track 2 probe trials
 
@@ -88,23 +90,38 @@ for iSim = 1:length(track2maxRun)
 end
 
 simResults(:,4) = pdf(simResults(:,1));
+simResults(:,5) = cdf(simResults(:,1));
+simResults(:,6) = (1 - cdf(simResults(:,1))) * frac_pr; % unnormalized belief state = P(no rew by d | rew trial) * P(rew trial) = (1 - P(rew by d | rew trial) * P(rew trial)
 
 
 if do_plot
     %display(simResults)
     figure; 
 
-    subplot(2,1,1);
+    subplot(4,1,1);
     plot(simResults(:,1),simResults(:,2));
     title('Expected reward given policy');
     xlabel('Stop distance');
     ylabel('Expected reward');
     
-    subplot(2,1,2);
+    subplot(4,1,2);
     plot(simResults(:,1),simResults(:,4));
     xlabel('distance');
     ylabel('probability density');
     title('Reward location PDF');
+
+    
+    subplot(4,1,3);
+    plot(simResults(:,1),simResults(:,5));
+    xlabel('distance');
+    ylabel('cumulative density');
+    title('Reward location CDF');
+
+    subplot(4,1,4);
+    plot(simResults(:,1),simResults(:,6));
+    xlabel('distance');
+    ylabel('unnormalized P(rew trial | no rew by d)');
+    title('Belief state');
 
 end
 
