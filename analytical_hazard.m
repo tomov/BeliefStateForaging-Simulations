@@ -27,7 +27,7 @@ gamma = 0.95; % TD discount rate
 
 speed = 5; % AU per second
 
-d_dist = 1; % accuracy of numerical approximation
+d_dist = 10; % accuracy of numerical approximation TODO this matters a lot for the magnitude of the hazard RPEs; must investigate
 track2maxRun = [1:d_dist:600]; % distances to try for how far mouse is willing to run on track 2 before quiting
 
 distr = 'norm'; % what kind of reward distribution to use
@@ -47,14 +47,18 @@ h_tr1 = f ./ (1 - F);
 % think of it as P(probe) of the probability mass being concentrated on a delta f'n at infinity, or somewhere outside the domain 
 h_tr2 = f * (1 - frac_pr) ./ (1 - F * (1 - frac_pr));
 
+V_tr1 = h_tr1 * 10;
+V_tr2 = h_tr2 * 100;
 
-post_RPE_tr1 = 1 - h_tr1;
-post_RPE_tr2 = 1 - h_tr2;
 
-pre_RPE_tr1 = h_tr1(2:end) * gamma^(d_dist / speed) - h_tr1(1:end-1);
-pre_RPE_tr1 = [h_tr1(1) pre_RPE_tr1];
-pre_RPE_tr2 = h_tr2(2:end) * gamma^(d_dist / speed) - h_tr2(1:end-1);
-pre_RPE_tr2 = [h_tr2(1) pre_RPE_tr2];
+post_RPE_tr1 = 1 - V_tr1;
+post_RPE_tr2 = 1 - V_tr2;
+
+pre_RPE_tr1 = V_tr1(2:end) * gamma^(d_dist / speed) - V_tr1(1:end-1);
+pre_RPE_tr1 = [V_tr1(1) pre_RPE_tr1];
+pre_RPE_tr2 = V_tr2(2:end) * gamma^(d_dist / speed) - V_tr2(1:end-1);
+pre_RPE_tr2 = [V_tr2(1) pre_RPE_tr2];
+
 
 if do_plot
     figure;
@@ -87,36 +91,77 @@ if do_plot
     plot(d, h_tr1);
     title('Hazard rate, track 1');
     xlabel('distance');
-    ylabel('h(distance)');
+    ylabel('h');
 
     subplot(5,2,6);
     plot(d, h_tr2);
     title('Hazard rate, track 2');
     xlabel('distance');
-    ylabel('h(distance)');
+    ylabel('h');
 
     subplot(5,2,7);
     plot(d, post_RPE_tr1);
     title('Hazard post-reward RPE, track 1');
     xlabel('distance');
-    ylabel('1 - h(distance)');
+    ylabel('1 - h');
     
     subplot(5,2,8);
     plot(d, post_RPE_tr2);
     title('Hazard post-reward RPE, track 2');
     xlabel('distance');
-    ylabel('1 - h(distance)');
+    ylabel('1 - h');
     
     subplot(5,2,9);
     plot(d, pre_RPE_tr1);
     title('Hazard pre-reward RPE, track 1');
     xlabel('distance');
-    ylabel('h''(distance)');
+    ylabel('h''');
 
     subplot(5,2,10);
     plot(d, pre_RPE_tr2);
     title('Hazard pre-reward RPE, track 2');
     xlabel('distance');
-    ylabel('h''(distance)');
+    ylabel('h''');
 
+
+
+    figure;
+
+    subplot(2,2,1);
+    plot(d, V_tr1);
+    title('Hazard value, track 1');
+    xlabel('distance');
+    ylabel('V');
+    xlim([1 400]);
+
+    subplot(2,2,2);
+    plot(d, V_tr2);
+    title('Hazard value, track 2');
+    xlabel('distance');
+    ylabel('V');
+    xlim([1 400]);
+
+    subplot(2,2,3);
+    title('Hazard RPE, track 1');
+    hold on;
+    plot(d, pre_RPE_tr1, 'color', [0 0 0]);
+    assert(d_dist == 10, 'sorry it''s hardcoded; below too');
+    for i = 3:2:30
+        plot([d(i-1) d(i) d(i+1)], [pre_RPE_tr1(i-1) post_RPE_tr1(i) pre_RPE_tr1(i+1)], 'color', [1-(i-1)/29 (i-1)/29 1]);
+    end
+    xlabel('distance');
+    ylabel('RPE');
+    xlim([1 400]);
+
+    subplot(2,2,4);
+    title('Hazard RPE, track 2');
+    hold on;
+    plot(d, pre_RPE_tr2, 'color', [0 0 0]);
+    for i = 3:2:30
+        plot([d(i-1) d(i) d(i+1)], [pre_RPE_tr2(i-1) post_RPE_tr2(i) pre_RPE_tr2(i+1)], 'color', [1-(i-1)/29 (i-1)/29 1]);
+    end
+    xlabel('distance');
+    ylabel('RPE');
+    xlim([1 400]);
+    
 end
