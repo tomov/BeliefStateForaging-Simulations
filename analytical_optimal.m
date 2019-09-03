@@ -1,4 +1,4 @@
-function [simResults, i] = analytical_optimal(x, do_plot)
+function [simResults, i] = analytical_optimal(x, do_plot, distr)
 
     % average reward (across both tracks) for each stopping distance on track 2
     % picks optimal stopping distance based on that
@@ -35,7 +35,9 @@ speed = 5; % AU per second
 d_dist = 1; % accuracy of numerical approximation
 track2maxRun = [1:d_dist:600]; % distances to try for how far mouse is willing to run on track 2 before quiting
 
-distr = 'norm'; % what kind of reward distribution to use
+if ~exist('distr', 'var')
+    distr = 'norm'; % what kind of reward distribution to use
+end
 [pdf, cdf, rnd, mea] = get_distr(distr, min_dist, mu, max_dist, sigma);
 
 

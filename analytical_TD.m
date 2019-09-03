@@ -1,4 +1,4 @@
-function analytical_TD(x, do_plot)
+function analytical_TD(x, do_plot, distr)
 
     % plot stuff for TD model
     %
@@ -31,7 +31,9 @@ speed = 5; % AU per second
 d_dist = 10; % accuracy of numerical approximation TODO this matters a lot for the magnitude of the hazard RPEs; must investigate
 track2maxRun = [1:d_dist:600]; % distances to try for how far mouse is willing to run on track 2 before quiting
 
-distr = 'norm'; % what kind of reward distribution to use
+if ~exist('distr', 'var')
+    distr = 'norm'; % what kind of reward distribution to use
+end
 [pdf, cdf, rnd, mea] = get_distr(distr, min_dist, mu, max_dist, sigma);
 
 
@@ -228,5 +230,6 @@ if do_plot
     ylabel('RPE');
     xlim([1 400]);
     ylim([-0.2 1]);
-    
+
+    sgtitle('TD');
 end

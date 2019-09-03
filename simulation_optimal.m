@@ -1,7 +1,7 @@
 % simulate mouse behavior in belief state foraging task to determine optimality
 % last edits MB 6-5-19, 7pm
 
-function [simResults, i] = simulation_optimal(x, do_plot)
+function [simResults, i] = simulation_optimal(x, do_plot, distr)
 
     rng default; % for reproducibility 
 
@@ -26,7 +26,9 @@ sigma = x(2); % std of rew dist
 min_dist = 20;
 max_dist = 500;
 
-distr = 'norm'; % what kind of reward distribution to use
+if ~exist('distr', 'var')
+    distr = 'norm'; % what kind of reward distribution to use
+end
 [pdf, cdf, rnd, mea] = get_distr(distr, min_dist, mu, max_dist, sigma);
 
 % set of trials types: 1 = track 1, 2 = track 2 non-probes, 3 = track2 probe (no reward)
