@@ -5,6 +5,10 @@ function [simResults, i] = simulation_optimal(x, do_plot)
 
     rng default; % for reproducibility 
 
+    % average reward (across both tracks) for each stopping distance on track 2
+    % picks optimal stopping distance based on that
+    % compare with analytical_optimal.m
+    %
     % example: [simResults, i] = simulation_optimal([120 40 8 0.5 0.3], true)
     %          [simResults, i] = simulation_optimal([140 80 8 0.7 0.2], true)
     %
@@ -23,7 +27,6 @@ min_dist = 20;
 max_dist = 500;
 
 distr = 'norm'; % what kind of reward distribution to use
-
 [pdf, cdf, rnd, mea] = get_distr(distr, min_dist, mu, max_dist, sigma);
 
 % set of trials types: 1 = track 1, 2 = track 2 non-probes, 3 = track2 probe (no reward)
