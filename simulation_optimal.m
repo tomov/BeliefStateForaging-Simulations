@@ -1,12 +1,12 @@
 % simulate mouse behavior in belief state foraging task to determine optimality
 % last edits MB 6-5-19, 7pm
 
-function [simResults, i] = simulation_beliefStateForaging(x, do_plot)
+function [simResults, i] = simulation_optimal(x, do_plot)
 
     rng default; % for reproducibility 
 
-    % example: [simResults, i] = simulation_beliefStateForaging([120 40 8 0.5 0.3], true)
-    %          [simResults, i] = simulation_beliefStateForaging([140 80 8 0.7 0.2], true)
+    % example: [simResults, i] = simulation_optimal([120 40 8 0.5 0.3], true)
+    %          [simResults, i] = simulation_optimal([140 80 8 0.7 0.2], true)
     %
     % x(1) = mean rew dist
     % x(2) = std rew dist
@@ -22,33 +22,9 @@ sigma = x(2); % std of rew dist
 min_dist = 20;
 max_dist = 500;
 
-distr = 'mixnorm'; % what kind of reward distribution to use
+distr = 'norm'; % what kind of reward distribution to use
 
-switch distr
-    case 'norm'
-        pdf = @(d) rewdist_norm_pdf(d, min_dist, mu, max_dist, sigma);
-        cdf = @(d) rewdist_norm_cdf(d, min_dist, mu, max_dist, sigma);
-        rnd = @() rewdist_norm_rnd(min_dist, mu, max_dist, sigma);
-        mea = @(maxd) rewdist_norm_mu(min_dist, mu, maxd, sigma);
-
-    case 'unif'
-        pdf = @(d) rewdist_unif_pdf(d, min_dist, max_dist);
-        cdf = @(d) rewdist_unif_cdf(d, min_dist, max_dist);
-        rnd = @() rewdist_unif_rnd(min_dist, max_dist);
-        mea = @(maxd) rewdist_unif_mu(min_dist, maxd);
-
-    case 'mixnorm'
-        mus = [50 140 250];
-        sigmas = [20 20 20];
-        w = [1 2 3];
-        pdf = @(d) rewdist_mixnorm_pdf(d, min_dist, mus, max_dist, sigmas, w);
-        cdf = @(d) rewdist_mixnorm_cdf(d, min_dist, mus, max_dist, sigmas, w);
-        rnd = @() rewdist_mixnorm_rnd(min_dist, mus, max_dist, sigmas, w);
-        mea = @(maxd) rewdist_mixnorm_mu(min_dist, mus, maxd, sigmas, w);
-
-    otherwise
-        assert(false);
-end
+[pdf, cdf, rnd, mea] = get_distr(distr, min_dist, mu, max_dist, sigma);
 
 % set of trials types: 1 = track 1, 2 = track 2 non-probes, 3 = track2 probe (no reward)
 %trialSet = [1 1 1 1 1 ...
@@ -65,7 +41,7 @@ trialSet = [ones(1, n_tr1), ...
 
 
 %% distances to test:
-track2maxRun = [10:10:600]; % distances to try for how far mouse is willing to run on track 2 before quiting
+track2maxRun = [1:10:600]; % distances to try for how far mouse is willing to run on track 2 before quiting
 
 %% 'measured' mouse variables (also relevant is time it takes them to stop and initiate new trial, though this would just be factored into ITI for scope of this simulation)
 speed = 5; % AU per second
@@ -129,31 +105,47 @@ for iSim = 1:numSims
         
     end
     
-    simResults(iSim,:) = [track2maxRun(iSim) rewTotal/timeTotal npr_rews/nprs];
+    d(iSim,:) = track2maxRun(iSim);
+    avg_R(iSim,:) = rewTotal/timeTotal;
+    tr2(iSim,:) = npr_rews/nprs;
     
 end
 
-simResults(:,4) = pdf(simResults(:,1));
+f = pdf(d); % track 1 reward distance PDF = P(rew at d) = track 2 non-probe PDF
+F = cdf(d); % track 1 reward distance CDF = P(rew before d) = track 2 non-probe CDF
 
 
 if do_plot
-    %display(simResults)
     figure; 
 
-    subplot(2,1,1);
-    plot(simResults(:,1),simResults(:,2));
-    title('Expected reward given policy');
-    xlabel('Stop distance');
-    ylabel('Expected reward');
-    
-    subplot(2,1,2);
-    plot(simResults(:,1),simResults(:,4));
+    subplot(3,2,1);
+    plot(d, f);
     xlabel('distance');
     ylabel('probability density');
     title('Reward location PDF');
 
+    
+    subplot(3,2,2);
+    plot(d, F);
+    xlabel('distance');
+    ylabel('cumulative density');
+    title('Reward location CDF');
+
+    subplot(3,1,2);
+    plot(d, avg_R);
+    title('Expected reward, given policy');
+    xlabel('Stop distance');
+    ylabel('Expected reward');
+    
+    subplot(3,1,3);
+    plot(d, tr2);
+    title('Fraction rewarded track 2 trials');
+    xlabel('Stop distance');
+    ylabel('P(rewarded)');
+    
+
 end
 
+[~,i] = max(avg_R);
 
-[~,i] = max(simResults(:,2));
-
+simResults = [d, avg_R, tr2, f, F];
