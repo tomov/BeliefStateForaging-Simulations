@@ -1,6 +1,6 @@
-function analytical_hazard(x, do_plot)
+function analytical_beliefTD(x, do_plot)
 
-    % plot stuff for hazard rate model
+    % plot stuff for belief-TD model
     %
     % x(1) = mean rew dist
     % x(2) = std rew dist
@@ -40,19 +40,38 @@ d = 1:d_dist:600; % distances
 f = pdf(d); % track 1 reward distance PDF = P(rew at d) = track 2 non-probe PDF
 F = cdf(d); % track 1 reward distance CDF = P(rew before d) = track 2 non-probe CDF
 
-% track 1 hazard rate = P(rew at d | no rew by d) = f(d) / (1 - F(d))
-h_tr1 = f ./ (1 - F);
+% TODO dedupe w/ analytical_TD
 
-% track 2 hazard rate = P(rew at d | no rew by d) = f(d) / (1 - F(d))
-% note we scale by P(non probe)
-% think of it as P(probe) of the probability mass being concentrated on a delta f'n at infinity, or somewhere outside the domain 
-h_tr2 = f * (1 - frac_pr) ./ (1 - F * (1 - frac_pr));
+% track 1/2 non-probe TD value = Q(d0, RUN) = E[ r_t gamma^(t - t0) ]
+%                              = integral f(d | no rew by d0) * gamma^((d - d0)/speed) * r * d_d
+%
+for i = 1:length(track2maxRun)
+    % P(rew at d | no rew by d_i)
+    % note difference from hazard
+    f_cond = f(i:end) ./ (1 - F(i));
+    
+    g = gamma .^ ((d(i:end) - d(i)) / speed);
+    rew = 1;
+    V(i) = sum(f_cond .* g .* rew .* d_dist);
+end
 
 
-% assume reward expectation = value = hazard
-% rescaled for vizualization
-V_tr1 = h_tr1 * 10;
-V_tr2 = h_tr2 * 100;
+% track 1 belief state = P(probe | no rew by d) = 0
+b_tr1 = 0 ./ (1 - F);
+
+% track 2 belief state = P(probe | no rew by d) 
+%              = P(no rew by d | probe) P(probe) / (P(no rew by d | probe) P(probe) + P(no rew by d | non probe) P(non probe))
+%              = 1 * frac_pr / (1 * frac_pr + (1 - P(rew by d | non probe)) * (1 - frac_pr))
+%              = 1 * frac_pr / (1 * frac_pr + CDF(d) * (1 - frac_pr))
+b_tr2 = frac_pr ./ (frac_pr + (1 - F) * (1 - frac_pr));
+
+
+V_tr1 = (1 - b_tr1) .* V;
+V_tr2 = (1 - b_tr2) .* V;
+
+
+% TODO dedupe w/ analytical_TD
+
 
 % post-reward RPEs
 post_RPE_tr1 = 1 - V_tr1;
@@ -65,66 +84,80 @@ pre_RPE_tr2 = V_tr2(2:end) * gamma^(d_dist / speed) - V_tr2(1:end-1);
 pre_RPE_tr2 = [V_tr2(1) pre_RPE_tr2];
 
 
+
 if do_plot
     figure; % for debugging
 
-    subplot(5,2,1);
+    subplot(6,2,1);
     plot(d, f);
     xlabel('distance');
     ylabel('probability density');
     title('Reward location PDF, track 1');
 
-    subplot(5,2,2);
+    subplot(6,2,2);
     plot(d, f * (1 - frac_pr));
     xlabel('distance');
     ylabel('probability density');
     title('Reward location PDF, track 2');
     
-    subplot(5,2,3);
+    subplot(6,2,3);
     plot(d, F);
     xlabel('distance');
     ylabel('cumulative density');
     title('Reward location CDF, track 1');
 
-    subplot(5,2,4);
+    subplot(6,2,4);
     plot(d, F * (1 - frac_pr));
     xlabel('distance');
     ylabel('cumulative density');
     title('Reward location CDF, track 2');
+    
+    subplot(6,2,5);
+    plot(d, b_tr1);
+    title('Belief state, track 1');
+    xlabel('distance');
+    ylabel('P(probe | no rew by distance)');
 
-    subplot(5,2,5);
-    plot(d, h_tr1);
-    title('Hazard rate, track 1');
+    subplot(6,2,6);
+    plot(d, b_tr2);
+    title('Belief state, track 2');
+    xlabel('distance');
+    ylabel('P(probe | no rew by distance)');
+
+
+    subplot(6,2,7);
+    plot(d, V_tr1);
+    title('Value, track 1');
     xlabel('distance');
     ylabel('h');
 
-    subplot(5,2,6);
-    plot(d, h_tr2);
-    title('Hazard rate, track 2');
+    subplot(6,2,8);
+    plot(d, V_tr2);
+    title('Value, track 2');
     xlabel('distance');
     ylabel('h');
 
-    subplot(5,2,7);
+    subplot(6,2,9);
     plot(d, post_RPE_tr1);
-    title('Hazard post-reward RPE, track 1');
+    title('Post-reward RPE, track 1');
     xlabel('distance');
     ylabel('1 - h');
     
-    subplot(5,2,8);
+    subplot(6,2,10);
     plot(d, post_RPE_tr2);
-    title('Hazard post-reward RPE, track 2');
+    title('Post-reward RPE, track 2');
     xlabel('distance');
     ylabel('1 - h');
     
-    subplot(5,2,9);
+    subplot(6,2,11);
     plot(d, pre_RPE_tr1);
-    title('Hazard pre-reward RPE, track 1');
+    title('Pre-reward RPE, track 1');
     xlabel('distance');
     ylabel('h''');
 
-    subplot(5,2,10);
+    subplot(6,2,12);
     plot(d, pre_RPE_tr2);
-    title('Hazard pre-reward RPE, track 2');
+    title('Pre-reward RPE, track 2');
     xlabel('distance');
     ylabel('h''');
 
@@ -139,52 +172,68 @@ if do_plot
 
     figure; % for Nao
 
-    subplot(4,2,1);
+    subplot(5,2,1);
     plot(d, f);
     xlabel('distance');
     ylabel('probability density');
     title('Reward location PDF, track 1');
     ylim([0 max(f)*1.2]);
 
-    subplot(4,2,2);
+    subplot(5,2,2);
     plot(d, f * (1 - frac_pr));
     xlabel('distance');
     ylabel('probability density');
     title('Reward location PDF, track 2');
     ylim([0 max(f)*1.2]);
     
-    subplot(4,2,3);
+    subplot(5,2,3);
     plot(d, F);
     xlabel('distance');
     ylabel('cumulative density');
     title('Reward location CDF, track 1');
     ylim([0 1]);
 
-    subplot(4,2,4);
+    subplot(5,2,4);
     plot(d, F * (1 - frac_pr));
     xlabel('distance');
     ylabel('cumulative density');
     title('Reward location CDF, track 2');
     ylim([0 1]);
 
-    subplot(4,2,5);
+
+    subplot(5,2,5);
+    plot(d, b_tr1);
+    title('Belief state, track 1');
+    xlabel('distance');
+    ylabel('P(probe | no rew by distance)');
+    ylim([0 1]);
+
+    subplot(5,2,6);
+    plot(d, b_tr2);
+    title('Belief state, track 2');
+    xlabel('distance');
+    ylabel('P(probe | no rew by distance)');
+    ylim([0 1]);
+
+
+    subplot(5,2,7);
     plot(d, V_tr1);
-    title('Hazard rate/value, track 1');
+    title('Value, track 1');
     xlabel('distance');
-    ylabel('V = h x 10');
+    ylabel('V');
     xlim([1 400]);
     ylim([0 1]);
 
-    subplot(4,2,6);
+    subplot(5,2,8);
     plot(d, V_tr2);
-    title('Hazard rate/value, track 2');
+    title('Value, track 2');
     xlabel('distance');
-    ylabel('V = h x 100');
+    ylabel('V');
     xlim([1 400]);
     ylim([0 1]);
 
-    subplot(4,2,7);
-    title('Hazard RPE, track 1');
+    subplot(5,2,9);
+    title('RPE, track 1');
     hold on;
     plot(d, pre_RPE_tr1, 'color', [0 0 0]);
     assert(d_dist == 10, 'sorry it''s hardcoded; below too');
@@ -196,8 +245,8 @@ if do_plot
     xlim([1 400]);
     ylim([-0.2 1]);
 
-    subplot(4,2,8);
-    title('Hazard RPE, track 2');
+    subplot(5,2,10);
+    title('RPE, track 2');
     hold on;
     plot(d, pre_RPE_tr2, 'color', [0 0 0]);
     for i = 5:2:30
