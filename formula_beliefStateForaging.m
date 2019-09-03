@@ -24,11 +24,14 @@ sigma = x(2); % std of rew dist
 min_dist = 20;
 max_dist = 500;
 
+gamma = 0.95; % TD discount rate
+
 speed = 5; % AU per second
 
-track2maxRun = [10:1:600]; % distances to try for how far mouse is willing to run on track 2 before quiting
+d_dist = 1; % accuracy of numerical approximation
+track2maxRun = [1:d_dist:600]; % distances to try for how far mouse is willing to run on track 2 before quiting
 
-distr = 'mixnorm'; % what kind of reward distribution to use
+distr = 'norm'; % what kind of reward distribution to use
 
 switch distr
     case 'norm'
@@ -84,51 +87,84 @@ for iSim = 1:length(track2maxRun)
     total_time = total_time + (mu_tr2_npr_rew / speed) * frac_rew_npr * n_tr2_npr; %  ... +  track 2 rewarded times 
     total_time = total_time + (1 + stop_dist / speed) * ((1 - frac_rew_npr) * n_tr2_npr + n_tr2_pr); % ... + track 2 non-rewarded times, accounting for the 1-second stop time
 
-    simResults(iSim,1) = stop_dist;
-    simResults(iSim,2) = total_rew / total_time;
-    simResults(iSim,3) = frac_rew_npr;
+    d(iSim,:) = stop_dist; % (stop) distances
+    avg_R(iSim,:) = total_rew / total_time; % average reward (both tracks), given that agent always stops at stop distance
+    tr2(iSim,:) = frac_rew_npr; % fraction of rewarded track 2 trials, given that agent always stops at stop distance
 end
 
-simResults(:,4) = pdf(simResults(:,1));
-simResults(:,5) = cdf(simResults(:,1));
+f = pdf(d); % track 1 reward distance PDF = P(rew at d) = track 2 non-probe PDF
+F = cdf(d); % track 1 reward distance CDF = P(rew before d) = track 2 non-probe CDF
 
-% belief state = P(probe | no rew by d) 
+% track 2 belief state = P(probe | no rew by d) 
 %              = P(no rew by d | probe) P(probe) / (P(no rew by d | probe) P(probe) + P(no rew by d | non probe) P(non probe))
 %              = 1 * frac_pr / (1 * frac_pr + (1 - P(rew by d | non probe)) * (1 - frac_pr))
 %              = 1 * frac_pr / (1 * frac_pr + CDF(d) * (1 - frac_pr))
-simResults(:,6) = frac_pr ./ (frac_pr + (1 - cdf(simResults(:,1))) * (1 - frac_pr));
+b = frac_pr ./ (frac_pr + (1 - F) * (1 - frac_pr));
 
+
+% track 2 hazard rate = P(rew at d | no rew by d) = f(d) / (1 - F(d))
+% note we scale by P(non probe)
+% think of it as P(probe) of the probability mass being concentrated on a delta f'n at infinity, or somewhere outside the domain 
+h = f * (1 - frac_pr) ./ (1 - F * (1 - frac_pr));
+
+% track 2 TD value = Q(d0, RUN) = E[ r_t gamma^(t - t0) ]
+%                  = integral f(d | no rew by d0) * gamma^((d - d0)/speed) * r * d_d
+%
+for i = 1:length(track2maxRun)
+    % P(rew at d | no rew by d_i)
+    % note difference from hazard; this is (almost) a proper PDF, with the exception of the frac_pr missing probability mass
+    f_cond = f(i:end) * (1 - frac_pr) ./ (1 - F(i) * (1 - frac_pr));
+    
+    g = gamma .^ ((d(i:end) - d(i)) / speed);
+
+    rew = 1;
+
+    V(i) = sum(f_cond .* g .* rew .* d_dist);
+end
 
 
 if do_plot
-    %display(simResults)
     figure; 
 
-    subplot(4,1,1);
-    plot(simResults(:,1),simResults(:,2));
+    subplot(6,1,1);
+    plot(d, avg_R);
     title('Expected reward given policy');
     xlabel('Stop distance');
     ylabel('Expected reward');
     
-    subplot(4,1,2);
-    plot(simResults(:,1),simResults(:,4));
+    subplot(6,1,2);
+    plot(d, f);
     xlabel('distance');
     ylabel('probability density');
     title('Reward location PDF');
 
     
-    subplot(4,1,3);
-    plot(simResults(:,1),simResults(:,5));
+    subplot(6,1,3);
+    plot(d, F);
     xlabel('distance');
     ylabel('cumulative density');
     title('Reward location CDF');
 
-    subplot(4,1,4);
-    plot(simResults(:,1),simResults(:,6));
+    subplot(6,1,4);
+    plot(d, b);
     xlabel('distance');
     ylabel('P(probe | no rew by distance)');
-    title('Belief state');
+    title('Belief state (track 2)');
+
+    subplot(6,1,5);
+    plot(d, h);
+    xlabel('distance');
+    ylabel('f(distance | no rew by distance)');
+    title('Hazard rate (track 2)');
+
+    subplot(6,1,6);
+    plot(d, V);
+    xlabel('distance');
+    ylabel('Q(distance, RUN | no rew by distance)');
+    title('Value (track 2)');
 
 end
 
-[~,i] = max(simResults(:,2));
+[~,i] = max(avg_R);
+
+simResults = table(d, avg_R, tr2, f, F, b, h);
