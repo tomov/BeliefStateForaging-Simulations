@@ -1,4 +1,4 @@
-function [simResults, i] = analytical_optimal(x, do_plot, distr)
+function [simResults, i] = analytical_optimal(x, do_plot, distr, distr_params)
 
     % average reward (across both tracks) for each stopping distance on track 2
     % picks optimal stopping distance based on that
@@ -13,6 +13,8 @@ function [simResults, i] = analytical_optimal(x, do_plot, distr)
     % x(3) = mean ITI
     % x(4) = fraction track 2 (probe and non-probe)
     % x(5) = fraction probe (of track 2)
+    % x(6) = (optional) min rew dist
+    % x(7) = (optional) max rew dist
 
 
 n_tr1 = 1 - x(4); % fraction of track 1 trials
@@ -25,8 +27,13 @@ meanITI = x(3);
 mu = x(1); % mean of rew dist
 sigma = x(2); % std of rew dist
 
-min_dist = 20;
-max_dist = 500;
+if length(x) <= 5
+    min_dist = 20;
+    max_dist = 500;
+else
+    min_dist = x(6);
+    max_dist = x(7);
+end
 
 gamma = 0.95; % TD discount rate
 
@@ -38,7 +45,10 @@ track2maxRun = [1:d_dist:600]; % distances to try for how far mouse is willing t
 if ~exist('distr', 'var')
     distr = 'norm'; % what kind of reward distribution to use
 end
-[pdf, cdf, rnd, mea] = get_distr(distr, min_dist, mu, max_dist, sigma);
+if ~exist('distr_params', 'var')
+    distr_params = [];
+end
+[pdf, cdf, rnd, mea] = get_distr(distr, min_dist, mu, max_dist, sigma, distr_params);
 
 
 for iSim = 1:length(track2maxRun)
@@ -68,32 +78,37 @@ F = cdf(d); % track 1 reward distance CDF = P(rew before d) = track 2 non-probe 
 
 
 if do_plot
-    figure; 
+    figure('pos', [1071         639         560         504]); 
 
     subplot(3,2,1);
     plot(d, f);
     xlabel('distance');
     ylabel('probability density');
     title('Reward location PDF');
+    xlim([1 400]);
     
     subplot(3,2,2);
     plot(d, F);
     xlabel('distance');
     ylabel('cumulative density');
     title('Reward location CDF');
+    xlim([1 400]);
 
     subplot(3,1,2);
     plot(d, avg_R);
     title('Expected reward, given policy');
     xlabel('Stop distance');
     ylabel('Expected reward');
+    xlim([1 400]);
     
     subplot(3,1,3);
     plot(d, tr2);
     title('Fraction rewarded track 2 trials');
     xlabel('Stop distance');
     ylabel('P(rewarded)');
+    xlim([1 400]);
     
+    mtit('Average-reward optimal', 'fontsize',16,'color',[0 0 0], 'xoff',-.04,'yoff',.035);
 
 end
 

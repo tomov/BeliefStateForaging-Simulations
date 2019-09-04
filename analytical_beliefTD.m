@@ -1,4 +1,4 @@
-function analytical_beliefTD(x, do_plot, distr)
+function analytical_beliefTD(x, do_plot, distr, distr_params)
 
     % plot stuff for belief-TD model
     %
@@ -7,6 +7,8 @@ function analytical_beliefTD(x, do_plot, distr)
     % x(3) = mean ITI
     % x(4) = fraction track 2 (probe and non-probe)
     % x(5) = fraction probe (of track 2)
+    % x(6) = (optional) min rew dist
+    % x(7) = (optional) max rew dist
 
 % TODO dedupe w/ analytical_optimal
 
@@ -21,20 +23,27 @@ meanITI = x(3);
 mu = x(1); % mean of rew dist
 sigma = x(2); % std of rew dist
 
-min_dist = 20;
-max_dist = 500;
+if length(x) <= 5
+    min_dist = 20;
+    max_dist = 500;
+else
+    min_dist = x(6);
+    max_dist = x(7);
+end
 
 gamma = 0.95; % TD discount rate
 
 speed = 5; % AU per second
 
 d_dist = 10; % accuracy of numerical approximation TODO this matters a lot for the magnitude of the hazard RPEs; must investigate
-track2maxRun = [1:d_dist:600]; % distances to try for how far mouse is willing to run on track 2 before quiting
 
 if ~exist('distr', 'var')
     distr = 'norm'; % what kind of reward distribution to use
 end
-[pdf, cdf, rnd, mea] = get_distr(distr, min_dist, mu, max_dist, sigma);
+if ~exist('distr_params', 'var')
+    distr_params = [];
+end
+[pdf, cdf, rnd, mea] = get_distr(distr, min_dist, mu, max_dist, sigma, distr_params);
 
 
 d = 1:d_dist:600; % distances
@@ -47,7 +56,7 @@ F = cdf(d); % track 1 reward distance CDF = P(rew before d) = track 2 non-probe 
 % track 1/2 non-probe TD value = Q(d0, RUN) = E[ r_t gamma^(t - t0) ]
 %                              = integral f(d | no rew by d0) * gamma^((d - d0)/speed) * r * d_d
 %
-for i = 1:length(track2maxRun)
+for i = 1:length(d)
     % P(rew at d | no rew by d_i)
     % note difference from hazard
     f_cond = f(i:end) ./ (1 - F(i));
@@ -56,10 +65,11 @@ for i = 1:length(track2maxRun)
     rew = 1;
     V(i) = sum(f_cond .* g .* rew .* d_dist);
 end
+V(V > 1) = 1; % TODO hack b/c of numerical approximation, values towards the tail get distorted
 
 
 % track 1 belief state = P(probe | no rew by d) = 0
-b_tr1 = 0 ./ (1 - F);
+b_tr1 = zeros(size(F));
 
 % track 2 belief state = P(probe | no rew by d) 
 %              = P(no rew by d | probe) P(probe) / (P(no rew by d | probe) P(probe) + P(no rew by d | non probe) P(non probe))
@@ -85,9 +95,11 @@ pre_RPE_tr1 = [V_tr1(1) pre_RPE_tr1];
 pre_RPE_tr2 = V_tr2(2:end) * gamma^(d_dist / speed) - V_tr2(1:end-1);
 pre_RPE_tr2 = [V_tr2(1) pre_RPE_tr2];
 
+save shit.mat
 
 
 if do_plot
+    %{
     figure; % for debugging
 
     subplot(6,2,1);
@@ -118,13 +130,13 @@ if do_plot
     plot(d, b_tr1);
     title('Belief state, track 1');
     xlabel('distance');
-    ylabel('P(probe | no rew by distance)');
+    ylabel('P(probe | no rew yet)');
 
     subplot(6,2,6);
     plot(d, b_tr2);
     title('Belief state, track 2');
     xlabel('distance');
-    ylabel('P(probe | no rew by distance)');
+    ylabel('P(probe | no rew yet)');
 
 
     subplot(6,2,7);
@@ -163,6 +175,7 @@ if do_plot
     xlabel('distance');
     ylabel('h''');
 
+    %}
 
 
 
@@ -172,13 +185,16 @@ if do_plot
 
 
 
-    figure; % for Nao
 
+    figure('pos', [1632         639         560         504]); % for Nao
+
+    %{
     subplot(5,2,1);
     plot(d, f);
     xlabel('distance');
     ylabel('probability density');
     title('Reward location PDF, track 1');
+    xlim([1 400]);
     ylim([0 max(f)*1.2]);
 
     subplot(5,2,2);
@@ -186,6 +202,7 @@ if do_plot
     xlabel('distance');
     ylabel('probability density');
     title('Reward location PDF, track 2');
+    xlim([1 400]);
     ylim([0 max(f)*1.2]);
     
     subplot(5,2,3);
@@ -193,6 +210,7 @@ if do_plot
     xlabel('distance');
     ylabel('cumulative density');
     title('Reward location CDF, track 1');
+    xlim([1 400]);
     ylim([0 1]);
 
     subplot(5,2,4);
@@ -200,41 +218,45 @@ if do_plot
     xlabel('distance');
     ylabel('cumulative density');
     title('Reward location CDF, track 2');
+    xlim([1 400]);
     ylim([0 1]);
+    %}
 
 
-    subplot(5,2,5);
+    subplot(3,2,5-4);
     plot(d, b_tr1);
     title('Belief state, track 1');
     xlabel('distance');
-    ylabel('P(probe | no rew by distance)');
-    ylim([0 1]);
+    ylabel('P(probe | no rew yet)');
+    xlim([1 400]);
+    ylim([-0.1 1]);
 
-    subplot(5,2,6);
+    subplot(3,2,6-4);
     plot(d, b_tr2);
     title('Belief state, track 2');
     xlabel('distance');
-    ylabel('P(probe | no rew by distance)');
-    ylim([0 1]);
+    ylabel('P(probe | no rew yet)');
+    xlim([1 400]);
+    ylim([-0.1 1]);
 
 
-    subplot(5,2,7);
+    subplot(3,2,7-4);
     plot(d, V_tr1);
     title('Value, track 1');
     xlabel('distance');
-    ylabel('V');
+    ylabel('Q');
     xlim([1 400]);
     ylim([0 1]);
 
-    subplot(5,2,8);
+    subplot(3,2,8-4);
     plot(d, V_tr2);
     title('Value, track 2');
     xlabel('distance');
-    ylabel('V');
+    ylabel('Q');
     xlim([1 400]);
     ylim([0 1]);
 
-    subplot(5,2,9);
+    subplot(3,2,9-4);
     title('RPE, track 1');
     hold on;
     plot(d, pre_RPE_tr1, 'color', [0 0 0]);
@@ -247,7 +269,7 @@ if do_plot
     xlim([1 400]);
     ylim([-0.2 1]);
 
-    subplot(5,2,10);
+    subplot(3,2,10-4);
     title('RPE, track 2');
     hold on;
     plot(d, pre_RPE_tr2, 'color', [0 0 0]);
@@ -259,4 +281,5 @@ if do_plot
     xlim([1 400]);
     ylim([-0.2 1]);
     
+    mtit('Belief-TD', 'fontsize',16,'color',[0 0 0], 'xoff',-.035,'yoff',.015);
 end

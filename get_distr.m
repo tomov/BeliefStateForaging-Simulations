@@ -1,4 +1,4 @@
-function [pdf, cdf, rnd, mea] = get_distr(distr, min_dist, mu, max_dist, sigma)
+function [pdf, cdf, rnd, mea] = get_distr(distr, min_dist, mu, max_dist, sigma, params)
 
     % get probability function densities and statistics 
     %
@@ -19,9 +19,15 @@ function [pdf, cdf, rnd, mea] = get_distr(distr, min_dist, mu, max_dist, sigma)
             mea = @(maxd) rewdist_unif_mu(min_dist, maxd);
 
         case 'mixnorm'
-            mus = [50 140 250];
-            sigmas = [10 10 10];
-            w = [3 2 1];
+            if ~exist('params', 'var')
+                mus = [50 140 250];
+                sigmas = [10 10 10];
+                w = [3 2 1];
+            else
+                mus = params.mus;
+                sigmas = params.sigmas;
+                w = params.w;
+            end
             pdf = @(d) rewdist_mixnorm_pdf(d, min_dist, mus, max_dist, sigmas, w);
             cdf = @(d) rewdist_mixnorm_cdf(d, min_dist, mus, max_dist, sigmas, w);
             rnd = @() rewdist_mixnorm_rnd(min_dist, mus, max_dist, sigmas, w);

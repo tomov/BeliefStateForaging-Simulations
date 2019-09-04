@@ -17,19 +17,30 @@ function [simResults, i] = simulation_optimal(x, do_plot, distr)
     % x(3) = mean ITI
     % x(4) = fraction track 2 (probe and non-probe)
     % x(5) = fraction probe (of track 2)
+    % x(6) = (optional) min rew dist
+    % x(7) = (optional) max rew dist
 
 %% task variables we can vary:
 meanITI = x(3); % 8; % mean seconds for inter-trial interval (does not account for mouse taking longer than that to trigger new trial by stopping)
 mu = x(1); % mean of rew dist
 sigma = x(2); % std of rew dist
 
-min_dist = 20;
-max_dist = 500;
+if length(x) <= 5
+    min_dist = 20;
+    max_dist = 500;
+else
+    min_dist = x(6);
+    max_dist = x(7);
+end
+
 
 if ~exist('distr', 'var')
     distr = 'norm'; % what kind of reward distribution to use
 end
-[pdf, cdf, rnd, mea] = get_distr(distr, min_dist, mu, max_dist, sigma);
+if ~exist('distr_params', 'var')
+    distr_params = [];
+end
+[pdf, cdf, rnd, mea] = get_distr(distr, min_dist, mu, max_dist, sigma, distr_params);
 
 % set of trials types: 1 = track 1, 2 = track 2 non-probes, 3 = track2 probe (no reward)
 %trialSet = [1 1 1 1 1 ...
