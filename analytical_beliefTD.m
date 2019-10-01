@@ -77,6 +77,13 @@ b_tr1 = zeros(size(F));
 %              = 1 * frac_pr / (1 * frac_pr + CDF(d) * (1 - frac_pr))
 b_tr2 = frac_pr ./ (frac_pr + (1 - F) * (1 - frac_pr));
 
+% plot for different fractions of probe trials
+fpr = [5 10 20 30 40] / 100;
+for i = 1:length(fpr)
+    leg{i} = sprintf('%.2f probes', fpr(i));
+    b_tr2_more(i,:) = fpr(i) ./ (fpr(i) + (1 - F) * (1 - fpr(i)));
+end
+
 
 V_tr1 = (1 - b_tr1) .* V;
 V_tr2 = (1 - b_tr2) .* V;
@@ -282,4 +289,20 @@ if do_plot
     ylim([-0.2 1]);
     
     mtit('Belief-TD', 'fontsize',16,'color',[0 0 0], 'xoff',-.035,'yoff',.015);
+
+
+
+
+
+
+    figure;
+
+    plot(d, b_tr2_more);
+    title('Belief state, track 2');
+    xlabel('distance');
+    ylabel('P(probe | no rew yet)');
+    legend(leg);
+    xlim([1 400]);
+    ylim([-0.1 1]);
+
 end
