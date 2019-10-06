@@ -78,9 +78,9 @@ b_tr1 = zeros(size(F));
 b_tr2 = frac_pr ./ (frac_pr + (1 - F) * (1 - frac_pr));
 
 % plot for different fractions of probe trials
-fpr = [5 10 20 30 40] / 100;
+fpr = [0.01 5 10 20 40] / 100;
 for i = 1:length(fpr)
-    leg{i} = sprintf('%.2f probes', fpr(i));
+    leg{i} = sprintf('%.2f%% omissions', fpr(i));
     b_tr2_more(i,:) = fpr(i) ./ (fpr(i) + (1 - F) * (1 - fpr(i)));
 end
 
@@ -295,14 +295,32 @@ if do_plot
 
 
 
-    figure;
+    figure('pos', [1000 1082 789 256]);
 
-    plot(d, b_tr2_more);
-    title('Belief state, track 2');
+    subplot(1,2,1);
+    cmap = [0.5 0.5 1; ...
+            1 0.5 0; ...
+            0.5 1 0];
+    colormap(cmap);
+    hold on;
+    plot(d, 1 - b_tr2_more(1,:), 'color', cmap(1,:));
+    plot(d, 1 - b_tr2_more(3,:), 'color', cmap(2,:));
+    title('Belief state');
     xlabel('distance');
-    ylabel('P(probe | no rew yet)');
+    ylabel('P(reward | no rew yet)');
+    legend({'track 1', 'track 2'});
+    xlim([1 400]);
+    ylim([-0.1 1]);
+
+
+    subplot(1,2,2);
+    plot(d, 1 - b_tr2_more);
+    title('Belief state');
+    xlabel('distance');
+    ylabel('P(reward | no rew yet)');
     legend(leg);
     xlim([1 400]);
     ylim([-0.1 1]);
+
 
 end

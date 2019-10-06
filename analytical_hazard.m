@@ -60,11 +60,19 @@ h_tr1 = f ./ (1 - F);
 % think of it as P(probe) of the probability mass being concentrated on a delta f'n at infinity, or somewhere outside the domain 
 h_tr2 = f * (1 - frac_pr) ./ (1 - F * (1 - frac_pr));
 
+% plot for different fractions of probe trials
+fpr = [0.01 5 10 20 40] / 100;
+for i = 1:length(fpr)
+    leg{i} = sprintf('%.2f%% omissions', fpr(i));
+    h_tr2_more(i,:) = f * (1 - fpr(i)) ./ (1 - F * (1 - fpr(i)));
+end
+
 
 % assume reward expectation = value = hazard
 % rescaled for vizualization TODO how did Sam/Clara rescale?
 V_tr1 = h_tr1 / max(h_tr1);
 V_tr2 = h_tr2 / max(h_tr2);
+V_tr2_more = h_tr2_more / max(h_tr2_more(:));
 
 
 % post-reward RPEs
@@ -231,4 +239,42 @@ if do_plot
     ylim([-0.2 1]);
     
     mtit('Hazard', 'fontsize',16,'color',[0 0 0], 'xoff',-.035,'yoff',.015);
+
+
+
+
+
+
+
+
+
+
+
+    figure('pos', [1000 1082 789 256]);
+
+    subplot(1,2,1);
+    cmap = [0.5 0.5 1; ...
+            1 0.5 0; ...
+            0.5 1 0];
+    colormap(cmap);
+    hold on;
+    plot(d, V_tr2_more(1,:), 'color', cmap(1,:));
+    plot(d, V_tr2_more(3,:), 'color', cmap(2,:));
+    title('Hazard rate');
+    xlabel('distance');
+    ylabel('h');
+    legend({'track 1', 'track 2'});
+    xlim([1 400]);
+    ylim([-0.1 1]);
+
+
+    subplot(1,2,2);
+    plot(d, V_tr2_more);
+    title('Hazard rate');
+    xlabel('distance');
+    ylabel('h');
+    legend(leg);
+    xlim([1 400]);
+    ylim([-0.1 1]);
+
 end

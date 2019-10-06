@@ -55,10 +55,8 @@ distr_params(9).sigmas = [50 50];
 distr_params(9).w = [1 1];
 
 for i = 1:1 % 1:length(distr)
-    %{
-    analytical_TD(x{i}, true, distr{i}, distr_params(i));
+    %analytical_TD(x{i}, true, distr{i}, distr_params(i));
     analytical_hazard(x{i}, true, distr{i}, distr_params(i));
-    analytical_optimal(x{i}, true, distr{i}, distr_params(i));
-    %}
+    %analytical_optimal(x{i}, true, distr{i}, distr_params(i));
     analytical_beliefTD(x{i}, true, distr{i}, distr_params(i));
 end
