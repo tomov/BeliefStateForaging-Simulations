@@ -258,8 +258,8 @@ if do_plot
             0.5 1 0];
     colormap(cmap);
     hold on;
-    plot(d, V_tr2_more(1,:), 'color', cmap(1,:));
-    plot(d, V_tr2_more(3,:), 'color', cmap(2,:));
+    plot(d, 1 - V_tr2_more(1,:), 'color', cmap(1,:));
+    plot(d, 1 - V_tr2_more(3,:), 'color', cmap(2,:));
     title('Hazard rate');
     xlabel('distance');
     ylabel('h');

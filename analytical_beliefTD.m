@@ -1,4 +1,4 @@
-function analytical_beliefTD(x, do_plot, distr, distr_params)
+function [b_tr1, b_tr2] = analytical_beliefTD(x, do_plot, distr, distr_params)
 
     % plot stuff for belief-TD model
     %
@@ -46,7 +46,7 @@ end
 [pdf, cdf, rnd, mea] = get_distr(distr, min_dist, mu, max_dist, sigma, distr_params);
 
 
-d = 1:d_dist:600; % distances
+d = 1:d_dist:1000; % distances
 
 f = pdf(d); % track 1 reward distance PDF = P(rew at d) = track 2 non-probe PDF
 F = cdf(d); % track 1 reward distance CDF = P(rew before d) = track 2 non-probe CDF
