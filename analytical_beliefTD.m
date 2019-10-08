@@ -1,4 +1,4 @@
-function [b_tr1, b_tr2, V_tr1, V_tr2, pre_RPE_tr1, pre_RPE_tr2, post_RPE_tr1, post_RPE_tr2] = analytical_beliefTD(x, do_plot, distr, distr_params, d_dist, frac_pr_tr1)
+function [b_tr1, b_tr2, V_tr1, V_tr2, pre_RPE_tr1, pre_RPE_tr2, post_RPE_tr1, post_RPE_tr2] = analytical_beliefTD(x, do_plot, distr, distr_params, d_dist, frac_pr_tr1, gamma, speed)
 
     % plot stuff for belief-TD model
     %
@@ -31,9 +31,12 @@ else
     max_dist = x(7);
 end
 
-gamma = 0.95; % TD discount rate
-
-speed = 5; % AU per second
+if ~is_arg('gamma')
+    gamma = 0.95; % TD discount rate
+end
+if ~is_arg('speed')
+    speed = 5; % AU per second
+end
 
 if ~exist('distr', 'var')
     distr = 'norm'; % what kind of reward distribution to use
