@@ -1,4 +1,4 @@
-function analytical_hazard(x, do_plot, distr, distr_params)
+function [h_tr1, h_tr2, V_tr1, V_tr2, pre_RPE_tr1, pre_RPE_tr2, post_RPE_tr1, post_RPE_tr2] = analytical_hazard(x, do_plot, distr, distr_params, d_dist, frac_pr_tr1)
 
     % plot stuff for hazard rate model
     %
@@ -35,7 +35,6 @@ gamma = 0.95; % TD discount rate
 
 speed = 5; % AU per second
 
-d_dist = 10; % accuracy of numerical approximation TODO this matters a lot for the magnitude of the hazard RPEs; must investigate
 track2maxRun = [1:d_dist:600]; % distances to try for how far mouse is willing to run on track 2 before quiting
 
 if ~exist('distr', 'var')
@@ -44,16 +43,23 @@ end
 if ~exist('distr_params', 'var')
     distr_params = [];
 end
+if ~exist('frac_pr_tr1', 'var')
+    frac_pr_tr1 = 0.01; % assume almost 100%
+end
+if ~exist('d_dist', 'var')
+    d_dist = 10; % accuracy of numerical approximation TODO this matters a lot for the magnitude of the hazard RPEs; must investigate
+end
 [pdf, cdf, rnd, mea] = get_distr(distr, min_dist, mu, max_dist, sigma, distr_params);
 
 
-d = 1:d_dist:600; % distances
+d = 1:d_dist:max(1000, max_dist); % distances
 
 f = pdf(d); % track 1 reward distance PDF = P(rew at d) = track 2 non-probe PDF
 F = cdf(d); % track 1 reward distance CDF = P(rew before d) = track 2 non-probe CDF
 
 % track 1 hazard rate = P(rew at d | no rew by d) = f(d) / (1 - F(d))
-h_tr1 = f ./ (1 - F);
+%h_tr1 = f ./ (1 - F);
+h_tr1 = f * (1 - frac_pr_tr1) ./ (1 - F * (1 - frac_pr_tr1));
 
 % track 2 hazard rate = P(rew at d | no rew by d) = f(d) / (1 - F(d))
 % note we scale by P(non probe)
@@ -70,8 +76,8 @@ end
 
 % assume reward expectation = value = hazard
 % rescaled for vizualization TODO how did Sam/Clara rescale?
-V_tr1 = h_tr1 / max(h_tr1);
-V_tr2 = h_tr2 / max(h_tr2);
+V_tr1 = h_tr1 / max([h_tr1 h_tr2]);
+V_tr2 = h_tr2 / max([h_tr1 h_tr2]);
 V_tr2_more = h_tr2_more / max(h_tr2_more(:));
 
 
@@ -87,7 +93,6 @@ pre_RPE_tr2 = [V_tr2(1) pre_RPE_tr2];
 
 
 if do_plot
-    %{
     figure; % for debugging
 
     subplot(5,2,1);
@@ -95,62 +100,71 @@ if do_plot
     xlabel('distance');
     ylabel('probability density');
     title('Reward location PDF, track 1');
+    xlim([1 100]);
 
     subplot(5,2,2);
     plot(d, f * (1 - frac_pr));
     xlabel('distance');
     ylabel('probability density');
     title('Reward location PDF, track 2');
+    xlim([1 100]);
     
     subplot(5,2,3);
     plot(d, F);
     xlabel('distance');
     ylabel('cumulative density');
     title('Reward location CDF, track 1');
+    xlim([1 100]);
 
     subplot(5,2,4);
     plot(d, F * (1 - frac_pr));
     xlabel('distance');
     ylabel('cumulative density');
     title('Reward location CDF, track 2');
+    xlim([1 100]);
 
     subplot(5,2,5);
     plot(d, h_tr1);
     title('Hazard rate, track 1');
     xlabel('distance');
     ylabel('h');
+    xlim([1 100]);
 
     subplot(5,2,6);
     plot(d, h_tr2);
     title('Hazard rate, track 2');
     xlabel('distance');
     ylabel('h');
+    xlim([1 100]);
 
     subplot(5,2,7);
     plot(d, post_RPE_tr1);
     title('Hazard post-reward RPE, track 1');
     xlabel('distance');
     ylabel('1 - h');
+    xlim([1 100]);
     
     subplot(5,2,8);
     plot(d, post_RPE_tr2);
     title('Hazard post-reward RPE, track 2');
     xlabel('distance');
     ylabel('1 - h');
+    xlim([1 100]);
     
     subplot(5,2,9);
     plot(d, pre_RPE_tr1);
     title('Hazard pre-reward RPE, track 1');
     xlabel('distance');
     ylabel('h''');
+    xlim([1 100]);
 
     subplot(5,2,10);
     plot(d, pre_RPE_tr2);
     title('Hazard pre-reward RPE, track 2');
     xlabel('distance');
     ylabel('h''');
+    xlim([1 100]);
 
-    %}
 
 
 

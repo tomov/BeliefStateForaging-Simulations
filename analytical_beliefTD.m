@@ -1,4 +1,4 @@
-function [b_tr1, b_tr2] = analytical_beliefTD(x, do_plot, distr, distr_params)
+function [b_tr1, b_tr2, V_tr1, V_tr2, pre_RPE_tr1, pre_RPE_tr2, post_RPE_tr1, post_RPE_tr2] = analytical_beliefTD(x, do_plot, distr, distr_params, d_dist, frac_pr_tr1)
 
     % plot stuff for belief-TD model
     %
@@ -35,18 +35,22 @@ gamma = 0.95; % TD discount rate
 
 speed = 5; % AU per second
 
-d_dist = 10; % accuracy of numerical approximation TODO this matters a lot for the magnitude of the hazard RPEs; must investigate
-
 if ~exist('distr', 'var')
     distr = 'norm'; % what kind of reward distribution to use
 end
 if ~exist('distr_params', 'var')
     distr_params = [];
 end
+if ~exist('d_dist', 'var')
+    d_dist = 10; % accuracy of numerical approximation TODO this matters a lot for the magnitude of the hazard RPEs; must investigate
+end
+if ~exist('frac_pr_tr1', 'var')
+    frac_pr_tr1 = 0.01; % assume almost 100%
+end
 [pdf, cdf, rnd, mea] = get_distr(distr, min_dist, mu, max_dist, sigma, distr_params);
 
 
-d = 1:d_dist:1000; % distances
+d = 1:d_dist:max(1000, max_dist); % distances
 
 f = pdf(d); % track 1 reward distance PDF = P(rew at d) = track 2 non-probe PDF
 F = cdf(d); % track 1 reward distance CDF = P(rew before d) = track 2 non-probe CDF
@@ -66,10 +70,12 @@ for i = 1:length(d)
     V(i) = sum(f_cond .* g .* rew .* d_dist);
 end
 V(V > 1) = 1; % TODO hack b/c of numerical approximation, values towards the tail get distorted
+V(isnan(V)) = 1; % TODO hack for tail of distr
 
 
 % track 1 belief state = P(probe | no rew by d) = 0
-b_tr1 = zeros(size(F));
+%b_tr1 = zeros(size(F));
+b_tr1 = frac_pr_tr1 ./ (frac_pr + (1 - F) * (1 - frac_pr_tr1));
 
 % track 2 belief state = P(probe | no rew by d) 
 %              = P(no rew by d | probe) P(probe) / (P(no rew by d | probe) P(probe) + P(no rew by d | non probe) P(non probe))
@@ -106,7 +112,6 @@ save shit.mat
 
 
 if do_plot
-    %{
     figure; % for debugging
 
     subplot(6,2,1);
@@ -114,36 +119,42 @@ if do_plot
     xlabel('distance');
     ylabel('probability density');
     title('Reward location PDF, track 1');
+    xlim([1 100]);
 
     subplot(6,2,2);
     plot(d, f * (1 - frac_pr));
     xlabel('distance');
     ylabel('probability density');
     title('Reward location PDF, track 2');
+    xlim([1 100]);
     
     subplot(6,2,3);
     plot(d, F);
     xlabel('distance');
     ylabel('cumulative density');
     title('Reward location CDF, track 1');
+    xlim([1 100]);
 
     subplot(6,2,4);
     plot(d, F * (1 - frac_pr));
     xlabel('distance');
     ylabel('cumulative density');
     title('Reward location CDF, track 2');
+    xlim([1 100]);
     
     subplot(6,2,5);
     plot(d, b_tr1);
     title('Belief state, track 1');
     xlabel('distance');
     ylabel('P(probe | no rew yet)');
+    xlim([1 100]);
 
     subplot(6,2,6);
     plot(d, b_tr2);
     title('Belief state, track 2');
     xlabel('distance');
     ylabel('P(probe | no rew yet)');
+    xlim([1 100]);
 
 
     subplot(6,2,7);
@@ -151,38 +162,43 @@ if do_plot
     title('Value, track 1');
     xlabel('distance');
     ylabel('h');
+    xlim([1 100]);
 
     subplot(6,2,8);
     plot(d, V_tr2);
     title('Value, track 2');
     xlabel('distance');
     ylabel('h');
+    xlim([1 100]);
 
     subplot(6,2,9);
     plot(d, post_RPE_tr1);
     title('Post-reward RPE, track 1');
     xlabel('distance');
     ylabel('1 - h');
+    xlim([1 100]);
     
     subplot(6,2,10);
     plot(d, post_RPE_tr2);
     title('Post-reward RPE, track 2');
     xlabel('distance');
     ylabel('1 - h');
+    xlim([1 100]);
     
     subplot(6,2,11);
     plot(d, pre_RPE_tr1);
     title('Pre-reward RPE, track 1');
     xlabel('distance');
     ylabel('h''');
+    xlim([1 100]);
 
     subplot(6,2,12);
     plot(d, pre_RPE_tr2);
     title('Pre-reward RPE, track 2');
     xlabel('distance');
     ylabel('h''');
+    xlim([1 100]);
 
-    %}
 
 
 

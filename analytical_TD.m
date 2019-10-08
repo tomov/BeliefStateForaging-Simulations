@@ -1,4 +1,4 @@
-function analytical_TD(x, do_plot, distr, distr_params)
+function [V_tr1, V_tr2, pre_RPE_tr1, pre_RPE_tr2, post_RPE_tr1, post_RPE_tr2] = analytical_TD(x, do_plot, distr, distr_params, d_dist, frac_pr_tr1)
 
     % plot stuff for TD model
     %
@@ -35,18 +35,22 @@ gamma = 0.95; % TD discount rate
 
 speed = 5; % AU per second
 
-d_dist = 10; % accuracy of numerical approximation TODO this matters a lot for the magnitude of the hazard RPEs; must investigate
-
 if ~exist('distr', 'var')
     distr = 'norm'; % what kind of reward distribution to use
 end
 if ~exist('distr_params', 'var')
     distr_params = [];
 end
+if ~exist('d_dist', 'var')
+    d_dist = 10; % accuracy of numerical approximation TODO this matters a lot for the magnitude of the hazard RPEs; must investigate
+end
+if ~exist('frac_pr_tr1', 'var')
+    frac_pr_tr1 = 0.01; % assume almost 100%
+end
 [pdf, cdf, rnd, mea] = get_distr(distr, min_dist, mu, max_dist, sigma, distr_params);
 
 
-d = 1:d_dist:600; % distances
+d = 1:d_dist:max(1000, max_dist); % distances
 
 f = pdf(d); % track 1 reward distance PDF = P(rew at d) = track 2 non-probe PDF
 F = cdf(d); % track 1 reward distance CDF = P(rew before d) = track 2 non-probe CDF
@@ -58,13 +62,15 @@ F = cdf(d); % track 1 reward distance CDF = P(rew before d) = track 2 non-probe 
 for i = 1:length(d)
     % P(rew at d | no rew by d_i)
     % note difference from hazard
-    f_cond = f(i:end) ./ (1 - F(i));
+    %f_cond = f(i:end) ./ (1 - F(i));
+    f_cond = f(i:end) * (1 - frac_pr_tr1) ./ (1 - F(i));
 
     g = gamma .^ ((d(i:end) - d(i)) / speed);
     rew = 1;
     V_tr1(i) = sum(f_cond .* g .* rew .* d_dist);
 end
 V_tr1(V_tr1 > 1) = 1; % TODO hack b/c of numerical approximation, values towards the tail get distorted
+V_tr1(isnan(V_tr1)) = 1; % TODO hack for tail of distr
 
 
 % track 2 TD value
@@ -83,6 +89,7 @@ for i = 1:length(d)
     V_tr2(i) = sum(f_cond .* g .* rew .* d_dist);
 end
 V_tr2(V_tr2 > 1) = 1; % TODO hack b/c of numerical approximation, values towards the tail get distorted
+V_tr2(isnan(V_tr2)) = 1; % TODO hack for tail of distr
 
 
 % TODO dedupe w/ analytical_hazard
@@ -101,7 +108,6 @@ pre_RPE_tr2 = [V_tr2(1) pre_RPE_tr2];
 
 
 if do_plot
-    %{
     figure; % for debugging
 
     subplot(5,2,1);
@@ -109,61 +115,70 @@ if do_plot
     xlabel('distance');
     ylabel('probability density');
     title('Reward location PDF, track 1');
+    xlim([1 100]);
 
     subplot(5,2,2);
     plot(d, f * (1 - frac_pr));
     xlabel('distance');
     ylabel('probability density');
     title('Reward location PDF, track 2');
+    xlim([1 100]);
     
     subplot(5,2,3);
     plot(d, F);
     xlabel('distance');
     ylabel('cumulative density');
     title('Reward location CDF, track 1');
+    xlim([1 100]);
 
     subplot(5,2,4);
     plot(d, F * (1 - frac_pr));
     xlabel('distance');
     ylabel('cumulative density');
     title('Reward location CDF, track 2');
+    xlim([1 100]);
 
     subplot(5,2,5);
     plot(d, V_tr1);
     title('Value, track 1');
     xlabel('distance');
     ylabel('h');
+    xlim([1 100]);
 
     subplot(5,2,6);
     plot(d, V_tr2);
     title('Value, track 2');
     xlabel('distance');
     ylabel('h');
+    xlim([1 100]);
 
     subplot(5,2,7);
     plot(d, post_RPE_tr1);
     title('Post-reward RPE, track 1');
     xlabel('distance');
     ylabel('1 - h');
+    xlim([1 100]);
     
     subplot(5,2,8);
     plot(d, post_RPE_tr2);
     title('Post-reward RPE, track 2');
     xlabel('distance');
     ylabel('1 - h');
+    xlim([1 100]);
     
     subplot(5,2,9);
     plot(d, pre_RPE_tr1);
     title('Pre-reward RPE, track 1');
     xlabel('distance');
     ylabel('h''');
+    xlim([1 100]);
 
     subplot(5,2,10);
     plot(d, pre_RPE_tr2);
     title('Pre-reward RPE, track 2');
     xlabel('distance');
     ylabel('h''');
-    %}
+    xlim([1 100]);
 
 
 
@@ -176,7 +191,6 @@ if do_plot
 
     figure('pos', [1067         346         560         291]); % for Nao
 
-    %{
     subplot(4,2,1);
     plot(d, f);
     xlabel('distance');
@@ -208,7 +222,6 @@ if do_plot
     title('Reward location CDF, track 2');
     xlim([1 400]);
     ylim([0 1]);
-    %}
 
     subplot(2,2,5-4);
     plot(d, V_tr1);
@@ -230,7 +243,7 @@ if do_plot
     title('RPE, track 1');
     hold on;
     plot(d, pre_RPE_tr1, 'color', [0 0 0]);
-%    assert(d_dist == 10, 'sorry it''s hardcoded; below too');
+    assert(d_dist == 10, 'sorry it''s hardcoded; below too');
     for i = 5:2:30
         plot([d(i-1) d(i) d(i+1)], [pre_RPE_tr1(i-1) post_RPE_tr1(i) pre_RPE_tr1(i+1)], 'color', [1-(i-1)/29 (i-1)/29 1]);
     end
