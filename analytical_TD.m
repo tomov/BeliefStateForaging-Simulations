@@ -73,8 +73,8 @@ for i = 1:length(d)
     rew = 1;
     V_tr1(i) = sum(f_cond .* g .* rew .* d_dist);
 end
-V_tr1(V_tr1 > 1) = 1 - frac_pr_tr1; % TODO hack b/c of numerical approximation, values towards the tail get distorted
-V_tr1(isnan(V_tr1)) = 1 - frac_pr_tr1; % TODO hack for tail of distr
+V_tr1(V_tr1 > 1) = nanmax(V_tr1); % TODO hack b/c of numerical approximation, values towards the tail get distorted
+V_tr1(isnan(V_tr1)) = nanmax(V_tr1); % TODO hack for tail of distr
 
 
 % track 2 TD value
@@ -92,8 +92,8 @@ for i = 1:length(d)
     rew = 1;
     V_tr2(i) = sum(f_cond .* g .* rew .* d_dist);
 end
-V_tr2(V_tr2 > 1) = 1 - frac_pr; % TODO hack b/c of numerical approximation, values towards the tail get distorted
-V_tr2(isnan(V_tr2)) = 1 - frac_pr; % TODO hack for tail of distr
+V_tr2(V_tr2 > 1) = nanmax(V_tr2); % TODO hack b/c of numerical approximation, values towards the tail get distorted
+V_tr2(isnan(V_tr2)) = nanmax(V_tr2); % TODO hack for tail of distr
 
 
 % TODO dedupe w/ analytical_hazard
@@ -243,6 +243,7 @@ if do_plot
     xlim([1 400]);
     ylim([0 1]);
 
+    %{
     subplot(2,2,7-4);
     title('RPE, track 1');
     hold on;
@@ -267,6 +268,59 @@ if do_plot
     ylabel('RPE');
     xlim([1 400]);
     ylim([-0.2 1]);
+    %}
 
     mtit('TD', 'fontsize',16,'color',[0 0 0], 'xoff',-.02,'yoff',.015);
+
+
+
+
+
+
+
+
+    figure('pos', [108 420 560 420]);
+
+    cmap = [0.5 0.5 1; ...
+            1 0.5 0; ...
+            0.5 1 0];
+
+    subplot(2,2,1);
+    colormap(cmap);
+    hold on;
+    plot(d, V_tr1, 'color', cmap(1,:), 'linewidth', 2);
+    plot(d, V_tr2, 'color', cmap(2,:), 'linewidth', 2);
+    title('Value');
+    xlabel('distance');
+    ylabel('Q(stay)');
+    legend({'track 1', 'track 2'});
+    xlim([1 max_dist * 1.2]);
+    %ylim([-0.1 1]);
+
+
+    subplot(2,2,3);
+    colormap(cmap);
+    hold on;
+    plot(d, pre_RPE_tr1, 'color', cmap(1,:), 'linewidth', 2);
+    plot(d, pre_RPE_tr2, 'color', cmap(2,:), 'linewidth', 2);
+    title('pre-reward RPE');
+    xlabel('distance');
+    ylabel('RPE');
+    legend({'track 1', 'track 2'});
+    xlim([2 max_dist * 1.2]);
+    %ylim([-0.1 1]);
+
+    subplot(2,2,4);
+    colormap(cmap);
+    hold on;
+    plot(d, post_RPE_tr1, 'color', cmap(1,:), 'linewidth', 2);
+    plot(d, post_RPE_tr2, 'color', cmap(2,:), 'linewidth', 2);
+    title('post-reward RPE');
+    xlabel('distance');
+    ylabel('RPE');
+    legend({'track 1', 'track 2'});
+    xlim([2 max_dist * 1.2]);
+    %ylim([-0.1 1]);
+    
+    mtit('CSC-TD', 'fontsize',16,'color',[0 0 0], 'xoff',-.02,'yoff',.015);
 end

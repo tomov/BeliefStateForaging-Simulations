@@ -72,8 +72,8 @@ for i = 1:length(d)
     rew = 1;
     V(i) = sum(f_cond .* g .* rew .* d_dist);
 end
-V(V > 1) = 1; % TODO hack b/c of numerical approximation, values towards the tail get distorted
-V(isnan(V)) = 1; % TODO hack for tail of distr
+V(V > 1) = nanmax(V); % TODO hack b/c of numerical approximation, values towards the tail get distorted
+V(isnan(V)) = nanmax(V); % TODO hack for tail of distr
 
 
 % track 1 belief state = P(probe | no rew by d) = 0
@@ -85,6 +85,7 @@ b_tr1 = frac_pr_tr1 ./ (frac_pr + (1 - F) * (1 - frac_pr_tr1));
 %              = 1 * frac_pr / (1 * frac_pr + (1 - P(rew by d | non probe)) * (1 - frac_pr))
 %              = 1 * frac_pr / (1 * frac_pr + CDF(d) * (1 - frac_pr))
 b_tr2 = frac_pr ./ (frac_pr + (1 - F) * (1 - frac_pr));
+
 
 % plot for different fractions of probe trials
 fpr = [0.01 5 10 20 40] / 100;
@@ -282,6 +283,7 @@ if do_plot
     xlim([1 400]);
     ylim([0 1]);
 
+    %{
     subplot(3,2,9-4);
     title('RPE, track 1');
     hold on;
@@ -306,6 +308,7 @@ if do_plot
     ylabel('RPE');
     xlim([1 400]);
     ylim([-0.2 1]);
+    %}
     
     mtit('Belief-TD', 'fontsize',16,'color',[0 0 0], 'xoff',-.035,'yoff',.015);
 
@@ -342,4 +345,80 @@ if do_plot
     ylim([-0.1 1]);
 
 
+
+
+
+
+
+
+    figure('pos', [1379 421 560 420]);
+
+    cmap = [0.5 0.5 1; ...
+            1 0.5 0; ...
+            0.5 1 0];
+
+    subplot(3,2,1);
+    colormap(cmap);
+    hold on;
+    plot(d, b_tr1, 'color', cmap(1,:), 'linewidth', 2);
+    plot(d, b_tr2, 'color', cmap(2,:), 'linewidth', 2);
+    title('Belief state');
+    xlabel('distance');
+    ylabel('P(omission|distance)');
+    legend({'track 1', 'track 2'});
+    xlim([1 max_dist * 1.2]);
+    ylim([-0.1 1.1]);
+
+
+    subplot(3,2,2);
+    colormap(cmap);
+    hold on;
+    plot(d, 1 - b_tr1, 'color', cmap(1,:), 'linewidth', 2);
+    plot(d, 1 - b_tr2, 'color', cmap(2,:), 'linewidth', 2);
+    title('Belief state');
+    xlabel('distance');
+    ylabel('P(rewarding|distance)');
+    legend({'track 1', 'track 2'});
+    xlim([1 max_dist * 1.2]);
+    ylim([-0.1 1.1]);
+
+
+    subplot(3,2,3);
+    colormap(cmap);
+    hold on;
+    plot(d, V_tr1, 'color', cmap(1,:), 'linewidth', 2);
+    plot(d, V_tr2, 'color', cmap(2,:), 'linewidth', 2);
+    title('Value');
+    xlabel('distance');
+    ylabel('Q(stay)');
+    legend({'track 1', 'track 2'});
+    xlim([1 max_dist * 1.2]);
+    ylim([-0.1 1]);
+
+
+    subplot(3,2,5);
+    colormap(cmap);
+    hold on;
+    plot(d, pre_RPE_tr1, 'color', cmap(1,:), 'linewidth', 2);
+    plot(d, pre_RPE_tr2, 'color', cmap(2,:), 'linewidth', 2);
+    title('pre-reward RPE');
+    xlabel('distance');
+    ylabel('RPE');
+    legend({'track 1', 'track 2'});
+    xlim([2 max_dist * 1.2]);
+    %ylim([-0.1 1]);
+
+    subplot(3,2,6);
+    colormap(cmap);
+    hold on;
+    plot(d, post_RPE_tr1, 'color', cmap(1,:), 'linewidth', 2);
+    plot(d, post_RPE_tr2, 'color', cmap(2,:), 'linewidth', 2);
+    title('post-reward RPE');
+    xlabel('distance');
+    ylabel('RPE');
+    legend({'track 1', 'track 2'});
+    xlim([2 max_dist * 1.2]);
+    %ylim([-0.1 1]);
+    
+    mtit('Belief-TD', 'fontsize',16,'color',[0 0 0], 'xoff',-.02,'yoff',.015);
 end

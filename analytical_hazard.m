@@ -156,6 +156,7 @@ if do_plot
     xlim([1 100]);
     
     subplot(5,2,9);
+    subplot(5,2,9);
     plot(d, pre_RPE_tr1);
     title('Hazard pre-reward RPE, track 1');
     xlabel('distance');
@@ -231,6 +232,7 @@ if do_plot
     xlim([1 400]);
     ylim([0 1]);
 
+    %{
     subplot(2,2,7-4);
     title('Hazard RPE, track 1');
     hold on;
@@ -255,6 +257,7 @@ if do_plot
     ylabel('RPE');
     xlim([1 400]);
     ylim([-0.2 1]);
+    %}
     
     mtit('Hazard', 'fontsize',16,'color',[0 0 0], 'xoff',-.035,'yoff',.015);
 
@@ -295,4 +298,53 @@ if do_plot
     xlim([1 400]);
     ylim([-0.1 1]);
 
+
+
+
+
+
+    figure('pos', [772 419 560 420]);
+
+    cmap = [0.5 0.5 1; ...
+            1 0.5 0; ...
+            0.5 1 0];
+
+    subplot(2,2,1);
+    colormap(cmap);
+    hold on;
+    plot(d, h_tr1, 'color', cmap(1,:), 'linewidth', 2);
+    plot(d, h_tr2, 'color', cmap(2,:), 'linewidth', 2);
+    title('Hazard');
+    xlabel('distance');
+    ylabel('f(reward|distance)');
+    legend({'track 1', 'track 2'});
+    xlim([1 max_dist * 1.2]);
+    %ylim([-0.1 1]);
+
+
+    subplot(2,2,3);
+    colormap(cmap);
+    hold on;
+    plot(d, pre_RPE_tr1, 'color', cmap(1,:), 'linewidth', 2);
+    plot(d, pre_RPE_tr2, 'color', cmap(2,:), 'linewidth', 2);
+    title('pre-reward RPE');
+    xlabel('distance');
+    ylabel('RPE');
+    legend({'track 1', 'track 2'});
+    xlim([2 max_dist * 1.2]);
+    %ylim([-0.1 1]);
+
+    subplot(2,2,4);
+    colormap(cmap);
+    hold on;
+    plot(d, post_RPE_tr1, 'color', cmap(1,:), 'linewidth', 2);
+    plot(d, post_RPE_tr2, 'color', cmap(2,:), 'linewidth', 2);
+    title('post-reward RPE');
+    xlabel('distance');
+    ylabel('RPE');
+    legend({'track 1', 'track 2'});
+    xlim([2 max_dist * 1.2]);
+    %ylim([-0.1 1]);
+    
+    mtit('Hazard', 'fontsize',16,'color',[0 0 0], 'xoff',-.02,'yoff',.015);
 end
