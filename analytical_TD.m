@@ -73,8 +73,8 @@ for i = 1:length(d)
     rew = 1;
     V_tr1(i) = sum(f_cond .* g .* rew .* d_dist);
 end
-V_tr1(V_tr1 > 1) = 1; % TODO hack b/c of numerical approximation, values towards the tail get distorted
-V_tr1(isnan(V_tr1)) = 1; % TODO hack for tail of distr
+V_tr1(V_tr1 > 1) = 1 - frac_pr_tr1; % TODO hack b/c of numerical approximation, values towards the tail get distorted
+V_tr1(isnan(V_tr1)) = 1 - frac_pr_tr1; % TODO hack for tail of distr
 
 
 % track 2 TD value
@@ -92,8 +92,8 @@ for i = 1:length(d)
     rew = 1;
     V_tr2(i) = sum(f_cond .* g .* rew .* d_dist);
 end
-V_tr2(V_tr2 > 1) = 1; % TODO hack b/c of numerical approximation, values towards the tail get distorted
-V_tr2(isnan(V_tr2)) = 1; % TODO hack for tail of distr
+V_tr2(V_tr2 > 1) = 1 - frac_pr; % TODO hack b/c of numerical approximation, values towards the tail get distorted
+V_tr2(isnan(V_tr2)) = 1 - frac_pr; % TODO hack for tail of distr
 
 
 % TODO dedupe w/ analytical_hazard
