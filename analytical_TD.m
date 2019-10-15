@@ -115,17 +115,19 @@ if do_plot
     figure; % for debugging
 
     subplot(5,2,1);
-    plot(d, f);
+    plot(d, f, 'linewidth', 2);
     xlabel('distance');
     ylabel('probability density');
     title('Reward location PDF, track 1');
+    ylim([0 0.05]);
     xlim([1 100]);
 
     subplot(5,2,2);
-    plot(d, f * (1 - frac_pr));
+    plot(d, f * (1 - frac_pr), 'linewidth', 2);
     xlabel('distance');
     ylabel('probability density');
     title('Reward location PDF, track 2');
+    ylim([0 0.05]);
     xlim([1 100]);
     
     subplot(5,2,3);

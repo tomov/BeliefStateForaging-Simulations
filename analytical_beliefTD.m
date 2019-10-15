@@ -72,8 +72,8 @@ for i = 1:length(d)
     rew = 1;
     V(i) = sum(f_cond .* g .* rew .* d_dist);
 end
-V(V > 1) = nanmax(V); % TODO hack b/c of numerical approximation, values towards the tail get distorted
-V(isnan(V)) = nanmax(V); % TODO hack for tail of distr
+%V(V > 1) = nanmax(V); % TODO hack b/c of numerical approximation, values towards the tail get distorted
+%V(isnan(V)) = nanmax(V); % TODO hack for tail of distr
 
 
 % track 1 belief state = P(probe | no rew by d) = 0
@@ -421,4 +421,53 @@ if do_plot
     %ylim([-0.1 1]);
     
     mtit('Belief-TD', 'fontsize',16,'color',[0 0 0], 'xoff',-.02,'yoff',.015);
+
+
+
+    mods = {1, 1.5, 0.5};
+    labs = {'Control', 'ChR2', 'Arch'};
+
+    figure;
+    hold on;
+
+    for m = 1:3
+
+        % TODO dedupe w/ above
+        V_tr1 = (1 - mods{m} * b_tr1) .* V;
+        V_tr2 = (1 - mods{m} * b_tr2) .* V;
+
+
+        % post-reward RPEs
+        post_RPE_tr1 = 1 - V_tr1;
+        post_RPE_tr2 = 1 - V_tr2;
+
+        % pre-reward RPEs
+        pre_RPE_tr1 = V_tr1(2:end) * gamma^(d_dist / speed) - V_tr1(1:end-1);
+        pre_RPE_tr1 = [V_tr1(1) pre_RPE_tr1];
+        pre_RPE_tr2 = V_tr2(2:end) * gamma^(d_dist / speed) - V_tr2(1:end-1);
+        pre_RPE_tr2 = [V_tr2(1) pre_RPE_tr2];
+
+        cmap = [0.5 0.5 1; ...
+                1 0.5 0; ...
+                0.5 1 0];
+
+
+        plot(d, post_RPE_tr2, 'linewidth', 2);
+        %plot(d, post_RPE_tr1, 'color', cmap(1,:), 'linewidth', 2);
+        %plot(d, post_RPE_tr2, 'color', cmap(2,:), 'linewidth', 2);
+        title('post-reward RPE');
+        xlabel('distance');
+        ylabel('RPE');
+        %legend({'track 1', 'track 2'});
+        xlim([2 max_dist * 1.2]);
+        %ylim([-0.1 1]);
+
+    end
+
+    legend(labs);
+    
+    mtit('Belief-TD', 'fontsize',16,'color',[0 0 0], 'xoff',-.02,'yoff',.015);
+
+
+    save wtf.mat
 end
