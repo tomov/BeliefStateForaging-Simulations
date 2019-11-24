@@ -98,7 +98,6 @@ end
 V_tr1 = (1 - b_tr1) .* V;
 V_tr2 = (1 - b_tr2) .* V;
 
-
 % TODO dedupe w/ analytical_TD
 
 
@@ -111,6 +110,9 @@ pre_RPE_tr1 = V_tr1(2:end) * gamma^(d_dist / speed) - V_tr1(1:end-1);
 pre_RPE_tr1 = [V_tr1(1) pre_RPE_tr1];
 pre_RPE_tr2 = V_tr2(2:end) * gamma^(d_dist / speed) - V_tr2(1:end-1);
 pre_RPE_tr2 = [V_tr2(1) pre_RPE_tr2];
+
+
+
 
 save shit.mat
 
@@ -424,50 +426,181 @@ if do_plot
 
 
 
-    mods = {1, 1.5, 0.5};
-    labs = {'Control', 'ChR2', 'Arch'};
+
+
+
+
+
+
+    %mods = [1, 1.5, 0.5];
+    mods = [0, 1, -1];
+    labs = {'Control', 'ChR2', 'NpHR'};
+
+    ramp = 1:length(b_tr1);
+    ramp = ramp' / ramp(round(50/d_dist));
+    ramp(ramp > 1) = 1;
+    %ramp(:) = 1;
+
+    b_tr1_stim = b_tr1' + (ramp * mods);
+    b_tr2_stim = b_tr2' + (ramp * mods);
+
+    % TODO dedupe w/ above
+    V_tr1_stim = (1 - b_tr1_stim) .* V';
+    V_tr2_stim = (1 - b_tr2_stim) .* V';
+
+
+    % post-reward RPEs
+    post_RPE_tr1_stim = 1 - V_tr1_stim;
+    post_RPE_tr2_stim = 1 - V_tr2_stim;
+
+    % pre-reward RPEs
+    pre_RPE_tr1_stim = V_tr1_stim(2:end,:) * gamma^(d_dist / speed) - V_tr1_stim(1:end-1,:);
+    pre_RPE_tr1_stim = [V_tr1_stim(1,:); pre_RPE_tr1_stim];
+    pre_RPE_tr2_stim = V_tr2_stim(2:end,:) * gamma^(d_dist / speed) - V_tr2_stim(1:end-1,:);
+    pre_RPE_tr2_stim = [V_tr2_stim(1,:); pre_RPE_tr2_stim];
+
 
     figure;
-    hold on;
+    save wtf.mat
 
-    for m = 1:3
+    cmap_tr1 = [0.5 0.5 1; ...
+                0.2 0.2 1; ...
+                0.8 0.8 1];
+    cmap_tr2 = [1 0.5 0; ...
+                1 0.2 0; ...
+                1 0.8 0];
 
-        % TODO dedupe w/ above
-        V_tr1 = (1 - mods{m} * b_tr1) .* V;
-        V_tr2 = (1 - mods{m} * b_tr2) .* V;
-
-
-        % post-reward RPEs
-        post_RPE_tr1 = 1 - V_tr1;
-        post_RPE_tr2 = 1 - V_tr2;
-
-        % pre-reward RPEs
-        pre_RPE_tr1 = V_tr1(2:end) * gamma^(d_dist / speed) - V_tr1(1:end-1);
-        pre_RPE_tr1 = [V_tr1(1) pre_RPE_tr1];
-        pre_RPE_tr2 = V_tr2(2:end) * gamma^(d_dist / speed) - V_tr2(1:end-1);
-        pre_RPE_tr2 = [V_tr2(1) pre_RPE_tr2];
-
-        cmap = [0.5 0.5 1; ...
-                1 0.5 0; ...
-                0.5 1 0];
+    subplot(5,2,1);
+    plot(d, ramp, 'linewidth', 2);
+    colormap(cmap_tr1);
+    xlabel('distance');
+    ylabel('laser');
+    xlim([2 max_dist * 1.2]);
+    ylim([-0.3 1.5]);
+    title('Stimulation');
 
 
-        plot(d, post_RPE_tr2, 'linewidth', 2);
-        %plot(d, post_RPE_tr1, 'color', cmap(1,:), 'linewidth', 2);
-        %plot(d, post_RPE_tr2, 'color', cmap(2,:), 'linewidth', 2);
-        title('post-reward RPE');
-        xlabel('distance');
-        ylabel('RPE');
-        %legend({'track 1', 'track 2'});
-        xlim([2 max_dist * 1.2]);
-        %ylim([-0.1 1]);
+    subplot(5,2,3);
+    plot(d, b_tr1_stim, 'linewidth', 2);
+    colormap(cmap_tr1);
+    xlabel('distance');
+    ylabel('P(omission | no rew yet)');
+    xlim([2 max_dist * 1.2]);
+    ylim([-0.3 1.5]);
+    title('Belief state, track 1');
+    legend(labs);
 
-    end
+    subplot(5,2,4);
+    plot(d, b_tr2_stim, 'linewidth', 2);
+    colormap(cmap_tr2);
+    xlabel('distance');
+    ylabel('P(omission | no rew yet)');
+    xlim([2 max_dist * 1.2]);
+    ylim([-0.3 1.5]);
+    title('Belief state, track 2');
+    legend(labs);
 
+
+    subplot(5,2,5);
+    plot(d, V_tr1_stim, 'linewidth', 2);
+    colormap(cmap_tr1);
+    xlabel('distance');
+    ylabel('Q');
+    xlim([2 max_dist * 1.2]);
+    ylim([-0.3 1.5]);
+    title('Value, track 1');
+    legend(labs);
+
+    subplot(5,2,6);
+    plot(d, V_tr2_stim, 'linewidth', 2);
+    colormap(cmap_tr2);
+    xlabel('distance');
+    ylabel('Q');
+    xlim([2 max_dist * 1.2]);
+    ylim([-0.3 1.5]);
+    title('Value, track 2');
     legend(labs);
     
-    mtit('Belief-TD', 'fontsize',16,'color',[0 0 0], 'xoff',-.02,'yoff',.015);
+    subplot(5,2,7);
+    plot(d, pre_RPE_tr1_stim, 'linewidth', 2);
+    colormap(cmap_tr1);
+    xlabel('distance');
+    ylabel('RPE');
+    xlim([2 max_dist * 1.2]);
+    title('RPE, track 1');
+    legend(labs);
+
+    subplot(5,2,8);
+    plot(d, pre_RPE_tr2_stim, 'linewidth', 2);
+    colormap(cmap_tr2);
+    xlabel('distance');
+    ylabel('RPE');
+    xlim([2 max_dist * 1.2]);
+    title('RPE, track 2');
+    legend(labs);
+    
+    
+    subplot(5,2,9);
+    plot(d, post_RPE_tr1_stim, 'linewidth', 2);
+    colormap(cmap_tr1);
+    xlabel('distance');
+    ylabel('RPE');
+    xlim([2 max_dist * 1.2]);
+    ylim([-0.3 1.5]);
+    title('post-reward RPE, track 1');
+    legend(labs);
+
+    subplot(5,2,10);
+    plot(d, post_RPE_tr2_stim, 'linewidth', 2);
+    colormap(cmap_tr2);
+    xlabel('distance');
+    ylabel('RPE');
+    xlim([2 max_dist * 1.2]);
+    ylim([-0.3 1.5]);
+    title('post-reward RPE, track 2');
+    legend(labs);
+    
+    mtit('Belief-TD manipulations, multiplicative', 'fontsize',16,'color',[0 0 0], 'xoff',-.02,'yoff',.015);
+
+
+
+
+
+
+
+
+
+
+
+
+
+    figure;
 
 
     save wtf.mat
+
+    for m = 1:3
+        subplot(3,2,(m-1)*2+1);
+        plot(d, post_RPE_tr1_stim(:,m), 'color', cmap_tr1(m,:), 'linewidth', 2);
+        xlabel('distance');
+        ylabel('dF/F');
+        xlim([2 max_dist * 1.2]);
+        if m == 1
+            title('Track 1');
+        end
+        legend([labs(m)]);
+
+        subplot(3,2,(m-1)*2+2);
+        plot(d, post_RPE_tr2_stim(:,m), 'color', cmap_tr2(m,:), 'linewidth', 2);
+        xlabel('distance');
+        ylabel('dF/F');
+        xlim([2 max_dist * 1.2]);
+        if m == 1
+            title('Track 2');
+        end
+        legend([labs(m)]);
+
+    end
+    mtit('VTA (Post-reward RPEs)', 'fontsize',16,'color',[0 0 0], 'xoff',-.02,'yoff',.015);
+
 end
