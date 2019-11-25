@@ -54,19 +54,24 @@ distr_params(9).mus = [50 350];
 distr_params(9).sigmas = [50 50];
 distr_params(9).w = [1 1];
 
-distr{10} = 'norm';
-x{10} = [80 30 8 0.7 0.2 10 150]; % mu, sigma, ITI, frac tr2, frac probe, min, max
-distr_params(10).mus = [20 40 60 80 100 120 140];
-distr_params(10).sigmas = 0.1 * ones(size(distr_params(10).mus));
-distr_params(10).w = normpdf(distr_params(10).mus, x{10}(1), x{10}(2));
-distr_params(10).mus = [];
-distr_params(10).sigmas = [];
-distr_params(10).w = [];
 
 gamma = 0.60;
 d_dist = 0.1;
 frac_pr_tr1 = 0.01;
-speed = 10;
+speed = 13;
+
+% discretized version
+%
+distr{10} = 'mixnorm';
+x{10} = [speed*4 speed*1 8 0.7 0.2 10 150]; % mu, sigma, ITI, frac tr2, frac probe, min, max
+distr_params(10).mus = speed * [2 3 4 5 6]; % centers in seconds
+distr_params(10).sigmas = 0.1 * ones(size(distr_params(10).mus));
+distr_params(10).w = normpdf(distr_params(10).mus, x{10}(1), x{10}(2));
+% comment out to un-discretize
+distr{10} = 'norm';
+distr_params(10).mus = [];
+distr_params(10).sigmas = [];
+distr_params(10).w = [];
 
 do_plot = true;
 
