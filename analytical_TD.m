@@ -32,10 +32,10 @@ else
     max_dist = x(7);
 end
 
-if ~is_arg('gamma')
+if ~exist('gamma', 'var')
     gamma = 0.95; % TD discount rate
 end
-if ~is_arg('speed')
+if ~exist('speed', 'var')
     speed = 5; % AU per second
 end
 

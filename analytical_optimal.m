@@ -1,4 +1,4 @@
-function [simResults, i] = analytical_optimal(x, do_plot, distr, distr_params)
+function [simResults, i] = analytical_optimal(x, do_plot, distr, distr_params, d_dist, frac_pr_tr1, gamma, speed)
 
     % average reward (across both tracks) for each stopping distance on track 2
     % picks optimal stopping distance based on that
@@ -35,11 +35,10 @@ else
     max_dist = x(7);
 end
 
-gamma = 0.95; % TD discount rate
+%gamma = 0.95; % TD discount rate
+%speed = 5; % AU per second
+%d_dist = 1; % accuracy of numerical approximation
 
-speed = 5; % AU per second
-
-d_dist = 1; % accuracy of numerical approximation
 track2maxRun = [1:d_dist:600]; % distances to try for how far mouse is willing to run on track 2 before quiting
 
 if ~exist('distr', 'var')
@@ -66,6 +65,11 @@ for iSim = 1:length(track2maxRun)
     % total time = ITIs + track 1 times + ...
     total_time = meanITI + (mu_tr1 / speed) * n_tr1;
     total_time = total_time + (mu_tr2_npr_rew / speed) * frac_rew_npr * n_tr2_npr; %  ... +  track 2 rewarded times 
+
+    if isnan(total_time)
+        save wtf.mat
+        nhosuea
+    end
     total_time = total_time + (1 + stop_dist / speed) * ((1 - frac_rew_npr) * n_tr2_npr + n_tr2_pr); % ... + track 2 non-rewarded times, accounting for the 1-second stop time
 
     d(iSim,:) = stop_dist; % (stop) distances
@@ -85,28 +89,28 @@ if do_plot
     xlabel('distance');
     ylabel('probability density');
     title('Reward location PDF');
-    xlim([1 400]);
+    xlim([1 200]);
     
     subplot(3,2,2);
     plot(d, F);
     xlabel('distance');
     ylabel('cumulative density');
     title('Reward location CDF');
-    xlim([1 400]);
+    xlim([1 200]);
 
     subplot(3,1,2);
     plot(d, avg_R);
     title('Expected reward, given policy');
     xlabel('Stop distance');
     ylabel('Expected reward');
-    xlim([1 400]);
+    xlim([1 200]);
     
     subplot(3,1,3);
     plot(d, tr2);
     title('Fraction rewarded track 2 trials');
     xlabel('Stop distance');
     ylabel('P(rewarded)');
-    xlim([1 400]);
+    xlim([1 200]);
     
     mtit('Average-reward optimal', 'fontsize',16,'color',[0 0 0], 'xoff',-.04,'yoff',.035);
 

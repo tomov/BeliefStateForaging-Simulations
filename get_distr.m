@@ -35,4 +35,5 @@ function [pdf, cdf, rnd, mea] = get_distr(distr, min_dist, mu, max_dist, sigma, 
 
         otherwise
             assert(false);
+
     end

@@ -31,10 +31,10 @@ else
     max_dist = x(7);
 end
 
-if ~is_arg('gamma')
+if ~exist('gamma', 'var')
     gamma = 0.95; % TD discount rate
 end
-if ~is_arg('speed')
+if ~exist('speed', 'var')
     speed = 5; % AU per second
 end
 
@@ -118,6 +118,7 @@ save shit.mat
 
 
 if do_plot
+
     figure; % for debugging
 
     subplot(6,2,1);
@@ -602,5 +603,6 @@ if do_plot
 
     end
     mtit('VTA (Post-reward RPEs)', 'fontsize',16,'color',[0 0 0], 'xoff',-.02,'yoff',.015);
+
 
 end
