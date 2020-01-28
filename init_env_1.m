@@ -1,7 +1,8 @@
 function env = init_env_1(frac_pr)
 
     % initialize interactive environment
-    % track 2 only (set frac_pr = 0 for track 1 only)
+
+    env.actions = {'run', 'stop'};
 
     % state constants
     env.first_rew = 1;

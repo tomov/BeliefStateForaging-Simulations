@@ -1,4 +1,4 @@
-function [env, s_new, o, r] = next_env_1(env, a)
+function [env, s, o, r] = next_env_1(env, a)
 
     % update environment after taking action
     % compute next state, observation, and reward
@@ -51,9 +51,11 @@ function [env, s_new, o, r] = next_env_1(env, a)
         end
     end
 
-    s_new = nexts(a);
-    o = env.obs(s_new);
-    env.s = s_new;
+    s = nexts(a);
+    o = env.obs(s);
+    env.s = s;
+    env.o = o;
+    env.r = r;
 
     assert(env.s >= 1 && env.s <= env.nS);
 
