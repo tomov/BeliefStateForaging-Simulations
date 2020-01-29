@@ -20,9 +20,11 @@ function env = init_env_1(frac_pr)
 
     % initial state
     env.s = env.ITI; % start at ITI
+    env.o = env.obs(env.s);
 
     % reward location
     env.rewloc = round(normrnd(5,1));
+    %env.rewloc = randi(6) + 2;
     env.rewloc = min(env.rewloc, 8);
     env.rewloc = max(env.rewloc, 2);
 
