@@ -3,7 +3,7 @@ frac_tr1 = 0.5;
 frac_pr = [0 0.2];
 init_fn = @() init_env_2(frac_tr1, frac_pr);
 
-%env = estimate_env(init_fn, @next_env_2);
+env = estimate_env(init_fn, @next_env_2);
 
 figure;
 
