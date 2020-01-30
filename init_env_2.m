@@ -41,8 +41,8 @@ function env = init_env_2(frac_tr1, frac_pr)
     % reward location
     rewloc = round(normrnd(5,1));
     %rewloc = randi(6) + 2;
-    rewloc = min(env.rewloc, 8);
-    rewloc = max(env.rewloc, 2);
+    rewloc = min(rewloc, 8);
+    rewloc = max(rewloc, 2);
     env.rewloc = rewloc + env.first_rew(env.track) - 1;
 
     % omission trial?

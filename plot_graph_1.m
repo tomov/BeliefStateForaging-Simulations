@@ -1,6 +1,6 @@
-function plot_graph(E, env)
+function plot_graph_1(E, env)
 
-    % helper method to plot the MDP
+    % helper method to plot the MDP for env 1
 
 
     c = zeros(1, env.nS);

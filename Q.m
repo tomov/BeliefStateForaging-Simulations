@@ -1,6 +1,7 @@
 % episodic and continuous Q learning
 
-frac_pr = 0.2;
+frac_tr1 = 0.7;
+frac_pr = [0 0.2];
 
 alpha = 0.1;
 eps = 0.1;
@@ -8,7 +9,7 @@ gamma = 0.9;
 
 episodic = false;
 
-ntrials = 100000;
+ntrials = 1;
 
 Q = zeros(env.nO, env.nA);
 
@@ -16,7 +17,7 @@ cnt = zeros(1, env.nO);
 visits = zeros(1, env.nO);
 
 for n = 1:ntrials
-     env = init_env_1(frac_pr);
+     env = init_env_2(frac_tr1, frac_pr);
 
      o_prev = env.o; % TODO agent
 
@@ -35,7 +36,7 @@ for n = 1:ntrials
          end
 
          % take action
-         [env, ~, o_new, r] = next_env_1(env, a);
+         [env, ~, o_new, r] = next_env_2(env, a);
 
          % pick best next action (for update)
          [~, a_new] = max(Q(o_new, :));
