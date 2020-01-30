@@ -1,4 +1,4 @@
-
+% plot result of Qlearn
 
 figure;
 
@@ -8,10 +8,11 @@ hold on;
 
 h = bar(rewards * 4);
 h.FaceAlpha = 0.3;
-plot(hazard, '-o');
+plot(Q(:,1), '-o', 'color', 'green');
+plot(Q(:,2), '-o', 'color', 'red');
 xlabel('observation');
-title('hazard');
-legend({'rewards', 'hazard'})
+title('Q values');
+legend({'rewards', 'run', 'stop'})
 
 plot([10.5 10.5], [-1 20], '--', 'color', [0.2 0.2 0.2], 'HandleVisibility','off');
 if isfield(env, 'track')
@@ -33,10 +34,12 @@ subplot(2,1,2);
 
 hold on;
 
-h = bar(hazard_posts);
+h = bar(posts);
 h.FaceAlpha = 0.3;
+plot(pres, '-o');
 xlabel('observation');
-title('hazard RPEs');
+title('RPEs');
+legend({'post-reward', 'pre-reward'})
 
 plot([10.5 10.5], [-1 20], '--', 'color', [0.2 0.2 0.2], 'HandleVisibility','off');
 if isfield(env, 'track')

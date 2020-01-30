@@ -1,4 +1,4 @@
-function env = init_env_1(frac_pr, ITI_len)
+function env = init_env_1(frac_pr, ITI_len, sigma)
 
     % initialize interactive environment
     % track 2 only
@@ -26,10 +26,9 @@ function env = init_env_1(frac_pr, ITI_len)
     env.o = env.obs(env.s);
 
     % reward location
-    env.rewloc = round(normrnd(5,1));
-    %env.rewloc = randi(6) + 2;
-    env.rewloc = min(env.rewloc, 8);
-    env.rewloc = max(env.rewloc, 2);
+    w = zeros(1,10);
+    w(2:8) = normpdf([2:8], 5, sigma);
+    env.rewloc = randsample(1:10, 1, true, w);
 
     % omission trial?
     env.omission = rand() < frac_pr;
