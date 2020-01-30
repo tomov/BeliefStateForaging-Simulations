@@ -2,6 +2,7 @@ function [env, s, o, r] = next_env_1(env, a)
 
     % update environment after taking action
     % compute next state, observation, and reward
+    % track 2 only
 
     r = 0;
     assert(a == 1 || a == 2);

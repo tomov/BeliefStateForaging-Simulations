@@ -1,7 +1,8 @@
-function [env, s, o, r] = next_env_1(env, a)
+function [env, s, o, r] = next_env_2(env, a)
 
     % update environment after taking action
     % compute next state, observation, and reward
+    % track 1+2
 
     r = 0;
     assert(a == 1 || a == 2);
@@ -12,11 +13,11 @@ function [env, s, o, r] = next_env_1(env, a)
 
         if env.omission
             % start of omission trial
-            nexts = [env.first_om env.first_om];
+            nexts = [env.first_om(env.track) env.first_om(env.track)];
             rews = [0 0];
         else
             % start of rewarded trial
-            nexts = [env.first_rew env.first_rew];
+            nexts = [env.first_rew(env.track) env.first_rew(env.track)];
             rews = [0 0];
         end
 
@@ -26,7 +27,7 @@ function [env, s, o, r] = next_env_1(env, a)
         if env.omission
             % middle of omission trial
 
-            if env.s == env.last_om
+            if env.s == env.last_om(env.track)
                 % end of track => go to ITI
                 nexts = [env.ITI env.ITI];
                 rews = [0 0];
@@ -46,7 +47,7 @@ function [env, s, o, r] = next_env_1(env, a)
                 % I prefer this to the alternative, b/c then we must reward for running *and* stopping, but then stopping becomes rewarding sometimes which is weird
                 nexts = [env.ITI env.ITI];
                 rews = [1 0];
-            elseif env.s == env.last_rew
+            elseif env.s == env.last_rew(env.track)
                 % end of track 
                 assert(false); % this should never happen -- you always get rewarded on rewarded trials
                 nexts = [NaN NaN];

@@ -1,6 +1,7 @@
 function env = init_env_1(frac_pr)
 
     % initialize interactive environment
+    % track 2 only
 
     env.actions = {'run', 'stop'};
 

@@ -17,7 +17,7 @@ function env = estimate_env_1(frac_pr)
 
         % simulate trial
         % keep running to traverse whole state space
-        % notice this assumes domain knowledge
+        % notice this assumes domain knowledge (that running is the way to go)
         % defer general T estimation to future work
         s_prev = env.s;
         while env.s ~= env.ITI || s_prev == env.ITI
