@@ -9,7 +9,11 @@ function [env, s, o, r] = next_env_1(env, a)
 
     if env.s == env.ITI
         % trial start
-        % TODO self-transition to simulate expo ITIs
+
+        if rand() < 1 - 1.0/env.ITI_len % expectation of geometric distribution
+            % self-transition to simulate expo ITIs
+            nexts = [env.ITI env.ITI];
+            rews = [0 0];
 
         if env.omission
             % start of omission trial

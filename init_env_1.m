@@ -1,4 +1,4 @@
-function env = init_env_1(frac_pr)
+function env = init_env_1(frac_pr, ITI_len)
 
     % initialize interactive environment
     % track 2 only
@@ -11,6 +11,8 @@ function env = init_env_1(frac_pr)
     env.first_om = 11;
     env.last_om = 20;
     env.ITI = 21;
+
+    env.ITI_len = ITI_len;
 
     env.obs = [1:10 1:10 11]; % S->O mapping
 

@@ -1,8 +1,8 @@
-function [env, s, o, r] = next_env_2(env, a)
+function [env, s, o, r] = next_env_1(env, a)
 
     % update environment after taking action
     % compute next state, observation, and reward
-    % track 1+2
+    % track 2 only, but continues along track after reward instead of going into ITI -- this is to simulate Clara's task
 
     r = 0;
     assert(a == 1 || a == 2);
@@ -17,11 +17,11 @@ function [env, s, o, r] = next_env_2(env, a)
 
         elseif env.omission
             % start of omission trial
-            nexts = [env.first_om(env.track) env.first_om(env.track)];
+            nexts = [env.first_om env.first_om];
             rews = [0 0];
         else
             % start of rewarded trial
-            nexts = [env.first_rew(env.track) env.first_rew(env.track)];
+            nexts = [env.first_rew env.first_rew];
             rews = [0 0];
         end
 
@@ -31,7 +31,7 @@ function [env, s, o, r] = next_env_2(env, a)
         if env.omission
             % middle of omission trial
 
-            if env.s == env.last_om(env.track)
+            if env.s == env.last_om
                 % end of track => go to ITI
                 nexts = [env.ITI env.ITI];
                 rews = [0 0];
@@ -49,13 +49,13 @@ function [env, s, o, r] = next_env_2(env, a)
                 % if stop, just go to ITI
                 % notice this means we never really reach the state with the reward
                 % I prefer this to the alternative, b/c then we must reward for running *and* stopping, but then stopping becomes rewarding sometimes which is weird
-                nexts = [env.ITI env.ITI];
+                assert(env.s ~= env.last_rew); % don't put reward after last state
+                nexts = [env.s+1 env.ITI];
                 rews = [1 0];
-            elseif env.s == env.last_rew(env.track)
-                % end of track 
-                assert(false); % this should never happen -- you always get rewarded on rewarded trials
-                nexts = [NaN NaN];
-                rews = [NaN NaN];
+            elseif env.s == env.last_rew
+                % end of track => go to ITI
+                nexts = [env.ITI env.ITI];
+                rews = [0 0];
             else
                 % next state (if running)
                 nexts = [env.s+1 env.ITI];

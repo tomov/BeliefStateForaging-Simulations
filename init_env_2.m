@@ -1,8 +1,9 @@
-function env = init_env_2(frac_tr1, frac_pr)
+function env = init_env_2(frac_tr1, frac_pr, ITI_len)
 
     % initialize interactive environment
     % track 1+2
     % frac_pr = fraction probes for [tr1 tr2]
+    % ITI_len = expected ITI dwell time
 
     % states:
     % 1..10 = tr1 rew
@@ -19,6 +20,8 @@ function env = init_env_2(frac_tr1, frac_pr)
     env.first_om = [11 31];
     env.last_om = [20 40];
     env.ITI = 41;
+
+    env.ITI_len = ITI_len;
 
     % observations:
     % 1..10 = tr1
