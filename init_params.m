@@ -21,7 +21,7 @@ function [frac_tr1, frac_pr, ITI_len, init_fn, next_fn, plot_fn, names] = init_p
             init_fn = @() init_env_0(frac_pr, ITI_len, sigma);
             next_fn = @next_env_0;
             plot_fn = @plot_graph_0; 
-            names = {'task 1'};
+            names = {'task 2'};
 
         % Our POMDP adapted to Starkweather et al. 2017 -- separate omission states and rewarded states
         % agent runs all the way to end after reward, like in CSC TD in the paper

@@ -28,21 +28,21 @@ post_RPE_cnts = zeros(1, env.nO);
 for n = 1:ntrials
      env = init_fn();
 
-     o_prev = env.o; % TODO agent
+     s_prev = env.s;
 
      %fprintf('\n\n----------------------- n = %d, track = %d, om = %d, rewloc = %d\n\n', n, env.track, env.omission, env.rewloc);
 
      got_reward = false; % for reset
 
-     while env.s ~= env.ITI || o_prev == env.obs(env.ITI)
-         o_prev = env.o;
+     while env.s ~= env.ITI || s_prev == env.ITI % TODO kind of a hack -- use trial start instead
+         s_prev = env.s;
 
          % observe
          o = env.o;
 
          % choose action
          [~, a] = max(Q(o,:));
-         if rand < eps % eps greedy
+         if env.nA > 1 && rand < eps % eps greedy
              a = randsample([1:a-1 a+1:env.nA], 1);
          end
 
@@ -68,7 +68,7 @@ for n = 1:ntrials
          end
 
          % TD update
-         if ~episodic || o ~= env.obs(env.ITI) % if episodic, don't accrue value in ITI
+         if ~episodic || s ~= env.ITI % if episodic, don't accrue value in ITI TODO assumes agent can distinguish ITI!
              Q(o,a) = Q(o,a) + alpha * RPE;
          end
 

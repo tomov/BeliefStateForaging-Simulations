@@ -34,7 +34,6 @@ function plot_graph_0(E, env)
     end
 
     text(-2, 0, 'ITI');
-    text(-2, -1, 'rewarded');
-    text(-2, 1, 'omission');
+    text(-2, -1, 'trial');
 
-    xlim([-3 22]);
+    xlim([-3 30]);
