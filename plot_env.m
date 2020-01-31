@@ -1,5 +1,6 @@
 
 %[frac_tr1, frac_pr, ITI_len, init_fn, next_fn, plot_fn] = init_params('clara_task_1');
+[frac_tr1, frac_pr, ITI_len, init_fn, next_fn, plot_fn, names] = init_params('clara_task_2_orig');
 
 env = estimate_env(init_fn, next_fn);
 
@@ -15,13 +16,13 @@ for a = 1:env.nA
     title(env.actions{a});
 
     % plot O
-    subplot(3, env.nA, 2+a);
+    subplot(3, env.nA, env.nA+a);
     E = squeeze(env.O(:,a,:));
     plot_fn(E, env);
     xlabel('observations');
 
     % plot R
-    subplot(3, env.nA, 4+a);
+    subplot(3, env.nA, 2*env.nA+a);
     E = squeeze(env.R(:,a,:));
     plot_fn(E, env);
     xlabel('rewards');

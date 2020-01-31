@@ -24,7 +24,7 @@ function env = estimate_env(init_fn, next_fn)
             s_prev = env.s;
 
             % see what happens for each action
-            for a = 1:2
+            for a = 1:env.nA
                 [~, s_new, o, r] = next_fn(env, a);
 
                 cnt(env.s, a, s_new, o, r+1) = cnt(env.s, a, s_new, o, r+1) + 1;

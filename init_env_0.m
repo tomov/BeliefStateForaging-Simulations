@@ -1,34 +1,31 @@
-function env = init_env_1(frac_pr, ITI_len, sigma)
+function env = init_env_0(frac_pr, ITI_len, sigma)
 
     % initialize interactive environment
-    % track 2 only
+    % task 2 from starkweather 2017 (can become task 1 if frac_pr = 0) 
+    % copy of init_env_0
 
     env.actions = {'run', 'stop'};
 
     % state constants
-    env.first_rew = 1;
-    env.last_rew = 10;
-    env.first_om = 11;
-    env.last_om = 20;
-    env.ITI = 21;
+    env.first = 1;
+    env.last = 14;
+    env.ITI = 15;
 
     env.ITI_len = ITI_len;
 
-    env.obs = [1:10 1:10 11]; % S->O mapping
-
-    env.nS = 21; % # states
-    env.nA = 2; % # actions
-    env.nO = max(env.obs); % # observations
-    env.nR = 2; % # rewards (a kind of observation)
+    env.nS = 15; % # states
+    env.nA = 1; % # actions
+    env.nO = 2; % # observations (1 = odor off, 2 = odor on)
+    env.nR = 2; % # rewards (a kind of observation: 1 = no rew, 2 = rew)
 
     % initial state
     env.s = env.ITI; % start at ITI
-    env.o = env.obs(env.s);
+    env.o = 1;
 
     % reward location
-    w = zeros(1,10);
-    w(2:8) = normpdf([2:8], 5, sigma);
-    env.rewloc = randsample(1:10, 1, true, w);
+    w = zeros(1,13);
+    w(6:12) = normpdf([2:8], 5, sigma);
+    env.ISI_len = randsample(1:13, 1, true, w);
 
     % omission trial?
     env.omission = rand() < frac_pr;
