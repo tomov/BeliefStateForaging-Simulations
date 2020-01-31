@@ -18,7 +18,7 @@ if isfield(env, 'track')
     plot([20.5 20.5], [-1 20], '--', 'color', [0.2 0.2 0.2], 'HandleVisibility','off');
 end
 
-yh = max(Q(:))*1.1;
+yh = 1.1;
 text(4, yh - 0.1, names{1});
 if isfield(env, 'track')
     text(14, yh - 0.1, names{2});
@@ -43,7 +43,7 @@ if isfield(env, 'track')
     plot([20.5 20.5], [-1 20], '--', 'color', [0.2 0.2 0.2], 'HandleVisibility','off');
 end
 
-yh = max(posts(:))*1.1;
+yh = max(hazard_posts(:))*1.1;
 yl = min(pres(:))*1.1;
 text(4, yh - 0.05, names{1});
 if isfield(env, 'track')

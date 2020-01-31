@@ -15,9 +15,9 @@ end
 xlabel('observation');
 title('Q values');
 if pavlovian
-    legend({'rewards', ''})
+    legend({'rewards', 'Q'})
 else
-    legend({'rewards', 'run', 'stop'})
+    legend({'rewards', 'Q(:,run)', 'Q(:,stop)'})
 end
 
 plot([10.5 10.5], [-1 20], '--', 'color', [0.2 0.2 0.2], 'HandleVisibility','off');
@@ -26,7 +26,7 @@ if isfield(env, 'track')
 end
 
 yh = max([h.YData Q(:)'])*1.1;
-yh = 2.5;
+yh = 1.5;
 text(4, yh - 0.1, names{1});
 if isfield(env, 'track')
     text(14, yh - 0.1, names{2});
