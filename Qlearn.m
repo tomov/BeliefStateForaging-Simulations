@@ -47,7 +47,7 @@ for n = 1:ntrials
          end
 
          if pavlovian
-             a = 1;
+             a = 1; % always run
          end
 
          %fprintf('   o = %d, a = %d\n', o, a);
