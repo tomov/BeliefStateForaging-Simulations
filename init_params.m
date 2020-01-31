@@ -1,4 +1,4 @@
-function [frac_tr1, frac_pr, ITI_len, init_fn, next_fn, plot_fn] = init_params(name)
+function [frac_tr1, frac_pr, ITI_len, init_fn, next_fn, plot_fn, names] = init_params(name)
 
     switch name
         case 'clara_task_1'
@@ -8,7 +8,8 @@ function [frac_tr1, frac_pr, ITI_len, init_fn, next_fn, plot_fn] = init_params(n
             sigma = 2;
             init_fn = @() init_env_1(frac_pr, ITI_len, sigma);
             next_fn = @next_env_1_1;
-            plot_fn = @plot_graph_1;
+            plot_fn = @plot_graph_1; 
+            names = {'task 1'};
 
         case 'clara_task_2'
             frac_tr1 = 0;
@@ -18,6 +19,17 @@ function [frac_tr1, frac_pr, ITI_len, init_fn, next_fn, plot_fn] = init_params(n
             init_fn = @() init_env_1(frac_pr, ITI_len, sigma);
             next_fn = @next_env_1_1;
             plot_fn = @plot_graph_1;
+            names = {'task 2'};
+
+        case 'track_2'
+            frac_tr1 = 0;
+            frac_pr = 0.2;
+            ITI_len = 10;
+            sigma = 2;
+            init_fn = @() init_env_1(frac_pr, ITI_len, sigma);
+            next_fn = @next_env_1;
+            plot_fn = @plot_graph_1;
+            names = {'track 2'};
 
         otherwise 
             assert(false);

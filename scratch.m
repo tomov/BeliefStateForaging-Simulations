@@ -19,9 +19,9 @@ if isfield(env, 'track')
 end
 
 yh = max(Q(:))*1.1;
-text(4, yh - 0.1, 'track 1');
+text(4, yh - 0.1, names{1});
 if isfield(env, 'track')
-    text(14, yh - 0.1, 'track 2');
+    text(14, yh - 0.1, names{2});
 end
 text(env.obs(env.ITI)-0.1, yh - 0.5, 'ITI');
 
@@ -45,9 +45,9 @@ end
 
 yh = max(posts(:))*1.1;
 yl = min(pres(:))*1.1;
-text(4, yh - 0.05, 'track 1');
+text(4, yh - 0.05, names{1});
 if isfield(env, 'track')
-    text(14, yh - 0.05, 'track 2');
+    text(14, yh - 0.05, names{2});
 end
 text(env.obs(env.ITI)-0.1, yh - 0.05, 'ITI');
 

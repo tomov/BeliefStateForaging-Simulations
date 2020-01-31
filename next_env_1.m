@@ -15,7 +15,7 @@ function [env, s, o, r] = next_env_1(env, a)
             nexts = [env.ITI env.ITI];
             rews = [0 0];
 
-        if env.omission
+        elseif env.omission
             % start of omission trial
             nexts = [env.first_om env.first_om];
             rews = [0 0];

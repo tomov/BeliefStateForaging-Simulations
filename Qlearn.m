@@ -1,9 +1,9 @@
 % episodic and continuous Q learning
 
-[frac_tr1, frac_pr, ITI_len, init_fn, next_fn, plot_fn] = init_params('clara_task_1');
+[frac_tr1, frac_pr, ITI_len, init_fn, next_fn, plot_fn, names] = init_params('clara_task_2');
 
 
-episodic = true;
+episodic = false;
 reset = true;
 pavlovian = true;
 
@@ -13,9 +13,9 @@ gamma = 0.9;
 
 ntrials = 10000;
 
-Q = rand(env.nO, env.nA) * 0.000001; % to break ties initially
-
 env = init_fn();
+
+Q = rand(env.nO, env.nA) * 0.000001; % to break ties initially
 
 rewards = zeros(1, env.nO);
 visits = zeros(1, env.nO);
@@ -73,6 +73,7 @@ for n = 1:ntrials
          end
 
          if r > 0
+             assert(~got_reward);
              got_reward = true;
          end
 
@@ -82,7 +83,7 @@ for n = 1:ntrials
          end
          visits(o) = visits(o) + 1;
 
-         if n > ntrials * 0.8
+         if n > ntrials * 0.9
              if r > 0
                  post_RPEs(o) = post_RPEs(o) + RPE;
                  post_RPE_cnts(o) = post_RPE_cnts(o) + 1;
@@ -110,4 +111,4 @@ hazard_posts = 1 - hazard; % TODO fix for track 2
 hazard_posts(isnan(posts)) = NaN;
 
 plot_Qlearn
-scratch
+%scratch

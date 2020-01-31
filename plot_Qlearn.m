@@ -9,20 +9,27 @@ hold on;
 h = bar(rewards * 4);
 h.FaceAlpha = 0.3;
 plot(Q(:,1), '-o', 'color', 'green');
-plot(Q(:,2), '-o', 'color', 'red');
+if ~pavlovian
+    plot(Q(:,2), '-o', 'color', 'red');
+end
 xlabel('observation');
 title('Q values');
-legend({'rewards', 'run', 'stop'})
+if pavlovian
+    legend({'rewards', ''})
+else
+    legend({'rewards', 'run', 'stop'})
+end
 
 plot([10.5 10.5], [-1 20], '--', 'color', [0.2 0.2 0.2], 'HandleVisibility','off');
 if isfield(env, 'track')
     plot([20.5 20.5], [-1 20], '--', 'color', [0.2 0.2 0.2], 'HandleVisibility','off');
 end
 
-yh = max(Q(:))*1.1;
-text(4, yh - 0.1, 'track 1');
+yh = max([h.YData Q(:)'])*1.1;
+yh = 2.5;
+text(4, yh - 0.1, names{1});
 if isfield(env, 'track')
-    text(14, yh - 0.1, 'track 2');
+    text(14, yh - 0.1, names{2});
 end
 text(env.obs(env.ITI)-0.1, yh - 0.5, 'ITI');
 
@@ -48,9 +55,9 @@ end
 
 yh = max(posts(:))*1.1;
 yl = min(pres(:))*1.1;
-text(4, yh - 0.05, 'track 1');
+text(4, yh - 0.05, names{1});
 if isfield(env, 'track')
-    text(14, yh - 0.05, 'track 2');
+    text(14, yh - 0.05, names{2});
 end
 text(env.obs(env.ITI)-0.1, yh - 0.05, 'ITI');
 
