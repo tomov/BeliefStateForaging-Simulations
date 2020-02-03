@@ -12,16 +12,24 @@ function [env, s, o, r] = next_env_0(env, a)
     if env.s == env.ITI
         % trial start
 
-        if rand() < 1 - 1.0/env.ITI_len % expectation of geometric distribution
+        if env.started && rand() < 1 - 1.0/env.ITI_len % expectation of geometric distribution
             % self-transition to simulate expo ITIs
+            % notice we do this only at end of trial, that is, the order is ISI->ITI
             nexts = [env.ITI];
             obs = [1];
             rews = [0];
 
-        else
+        elseif ~env.started
             % start of trial
+            env.started = true;
             nexts = [env.first];
             obs = [2]; % odor
+            rews = [0];
+        else
+            % trial is ending (started was true, and ITI is done)
+            env.ended = true;
+            nexts = [env.ITI];
+            obs = [1];
             rews = [0];
         end
 

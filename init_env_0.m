@@ -11,6 +11,9 @@ function env = init_env_0(frac_pr, ITI_len, sigma)
     env.last = 14;
     env.ITI = 15;
 
+    env.started = false;
+    env.ended = false;
+
     env.ITI_len = ITI_len;
 
     env.nS = 15; % # states

@@ -82,13 +82,13 @@ for n = 1:ntrials
          end
 
          fprintf('   o_new = %d, r = %d; b_new = [%s]\n', o_new, r, sprintf('%d,', b_new));
-         b = b_new;
 
          % pick best next action (for update)
          [~, a_new] = max(W' * b_new);
 
          % compute RPE
          RPE = r + gamma * (W(:,a_new)' * b_new) - W(:,a)' * b;
+         fprintf('   RPE = %f = %f + gamma * %f - %f\n', RPE,r,(W(:,a_new)' * b_new), W(:,a)' * b);
          if isnan(RPE) || isinf(RPE)
              ansoetu
          end
@@ -100,6 +100,9 @@ for n = 1:ntrials
          if any(isnan(W(:)))
              natheou
          end
+
+         % move to next belief state
+         b = b_new;
 
          % bookkeeping
          if r > 0

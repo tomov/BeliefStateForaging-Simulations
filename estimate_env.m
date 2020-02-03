@@ -19,9 +19,7 @@ function env = estimate_env(init_fn, next_fn)
         % keep running to traverse whole state space
         % notice this assumes domain knowledge (that running is the way to go)
         % defer general T estimation to future work
-        s_prev = env.s;
-        while env.s ~= env.ITI || s_prev == env.ITI
-            s_prev = env.s;
+        while ~env.ended
 
             % see what happens for each action
             for a = 1:env.nA
