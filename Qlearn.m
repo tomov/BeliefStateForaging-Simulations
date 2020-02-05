@@ -1,6 +1,6 @@
 % episodic and continuous Q learning
 
-[frac_tr1, frac_pr, ITI_len, init_fn, next_fn, plot_fn, names] = init_params('clara_task_2_ITI');
+[frac_tr1, frac_pr, ITI_len, init_fn, next_fn, plot_fn, names] = init_params('track_2');
 
 
 episodic = true;

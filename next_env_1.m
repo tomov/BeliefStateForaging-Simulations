@@ -32,8 +32,8 @@ function [env, s, o, r] = next_env_1(env, a)
         else
             % trial is ending (started was true, and ITI is done)
             env.ended = true;
-            nexts = [env.ITI];
-            rews = [0];
+            nexts = [env.ITI env.ITI];
+            rews = [0 0];
         end
 
     else

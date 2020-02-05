@@ -2,7 +2,7 @@
 
 % copy pasted from Q.m
 
-[frac_tr1, frac_pr, ITI_len, init_fn, next_fn, plot_fn, names] = init_params('clara_task_2');
+[frac_tr1, frac_pr, ITI_len, init_fn, next_fn, plot_fn, names] = init_params('clara_task_2_ITI');
 
 
 episodic = false;
