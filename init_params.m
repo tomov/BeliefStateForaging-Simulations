@@ -69,7 +69,7 @@ function [frac_tr1, frac_pr, ITI_len, init_fn, next_fn, plot_fn, names] = init_p
             plot_fn = @plot_graph_1;
             names = {'task 2'};
 
-        % Our tracks, across subject
+        % Our tracks, across subject; same as clara_task_*_ITI
 
         case 'track_1'
             frac_tr1 = 0;

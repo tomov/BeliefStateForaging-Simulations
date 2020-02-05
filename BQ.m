@@ -2,7 +2,7 @@
 
 % copy pasted from Q.m
 
-[frac_tr1, frac_pr, ITI_len, init_fn, next_fn, plot_fn, names] = init_params('clara_task_2_ITI');
+[frac_tr1, frac_pr, ITI_len, init_fn, next_fn, plot_fn, names] = init_params('track_1');
 
 
 episodic = false;
@@ -14,6 +14,8 @@ eps = 0.1;
 gamma = 0.9;
 
 ntrials = 10000;
+
+lesion = true;
 
 env = estimate_env(init_fn, next_fn);
 
@@ -48,6 +50,13 @@ for n = 1:ntrials
      end
 
      if do_print, fprintf('\n\n----------------------- n = %d\n\n', n); end
+
+     % simulate lesion by setting prob of going to omission substate to 0
+     % TODO note it's not normalized
+     if n == round(ntrials * 0.9) & lesion
+         P(:,:,11,:,:) = 0;
+         P(P == 0) = 0.00001; % TODO hack to prevent NaNs
+     end
 
      t = 1;
      while ~env.ended % a bit hacky
