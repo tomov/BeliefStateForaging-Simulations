@@ -1,9 +1,9 @@
 % episodic and continuous Q learning
 
-[frac_tr1, frac_pr, ITI_len, init_fn, next_fn, plot_fn, names] = init_params('clara_task_1_ITI');
+[frac_tr1, frac_pr, ITI_len, init_fn, next_fn, plot_fn, names] = init_params('clara_task_2_ITI');
 
 
-episodic = false;
+episodic = true;
 reset = false;
 pavlovian = true;
 
@@ -13,7 +13,7 @@ gamma = 0.9;
 
 ntrials = 10000;
 
-lesion = true;
+lesion = false;
 
 env = init_fn();
 

@@ -15,6 +15,8 @@ gamma = 0.9;
 
 ntrials = 10000;
 
+lesion = true;
+
 env = estimate_env(init_fn, next_fn);
 
 do_print = false;
@@ -82,6 +84,12 @@ for n = 1:ntrials
          if any(isnan(b_new))
              nthoeu
          end
+
+         % TODO right now omission trials are actual omissions, that is, they still traverse the state space, and since we endow the agent with the true model, it also traverses the state space, unlike the paper in which omissions assume the agent never left the ITI => for us, the 10% prob is scattered in the P function, so makes it harder to simulate
+         if n > round(ntrials * 0.9) & lesion
+             assert(false)
+         end
+
 
          if do_print, fprintf('   o_new = %d, r = %d; b_new = [%s]\n', o_new, r, sprintf('%.3f,', b_new)); end
 

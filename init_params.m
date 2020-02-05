@@ -69,7 +69,17 @@ function [frac_tr1, frac_pr, ITI_len, init_fn, next_fn, plot_fn, names] = init_p
             plot_fn = @plot_graph_1;
             names = {'task 2'};
 
-        % Our track 2
+        % Our tracks, across subject
+
+        case 'track_1'
+            frac_tr1 = 0;
+            frac_pr = 0.0;
+            ITI_len = 10;
+            sigma = 2;
+            init_fn = @() init_env_1(frac_pr, ITI_len, sigma);
+            next_fn = @next_env_1;
+            plot_fn = @plot_graph_1;
+            names = {'track 1'};
 
         case 'track_2'
             frac_tr1 = 0;
