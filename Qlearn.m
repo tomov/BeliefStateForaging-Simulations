@@ -1,6 +1,6 @@
 % episodic and continuous Q learning
 
-[frac_tr1, frac_pr, ITI_len, init_fn, next_fn, plot_fn, names] = init_params('clara_task_2_orig');
+[frac_tr1, frac_pr, ITI_len, init_fn, next_fn, plot_fn, names] = init_params('clara_task_1_ITI');
 
 
 episodic = true;
@@ -34,8 +34,9 @@ for n = 1:ntrials
 
      got_reward = false; % for reset
 
-     while env.s ~= env.ITI || s_prev == env.ITI % TODO kind of a hack -- use trial start instead
-         s_prev = env.s;
+     while ~env.ended % TODO kind of a hack -- use trial start instead
+         % for bookkeeping only
+         s = env.s;
 
          % observe
          o = env.o;

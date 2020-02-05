@@ -2,10 +2,10 @@
 
 % copy pasted from Q.m
 
-[frac_tr1, frac_pr, ITI_len, init_fn, next_fn, plot_fn, names] = init_params('clara_task_2_orig');
+[frac_tr1, frac_pr, ITI_len, init_fn, next_fn, plot_fn, names] = init_params('clara_task_2');
 
 
-episodic = true;
+episodic = false;
 pavlovian = true;
 
 
@@ -17,18 +17,20 @@ ntrials = 10000;
 
 env = estimate_env(init_fn, next_fn);
 
+do_print = false;
+
 % estimate model
 P = env.P;
 
 W = zeros(env.nS, env.nA); % belief state weights for each action 
 
-rewards = zeros(1, env.nO);
-visits = zeros(1, env.nO);
+rewards = zeros(1, env.nS);
+visits = zeros(1, env.nS);
 
-pre_RPEs = zeros(1, env.nO);
-pre_RPE_cnts = zeros(1, env.nO);
-post_RPEs = zeros(1, env.nO);
-post_RPE_cnts = zeros(1, env.nO);
+pre_RPEs = zeros(1, env.nS);
+pre_RPE_cnts = zeros(1, env.nS);
+post_RPEs = zeros(1, env.nS);
+post_RPE_cnts = zeros(1, env.nS);
 
 for n = 1:ntrials
      env = init_fn();
@@ -45,11 +47,12 @@ for n = 1:ntrials
          B{1} = nan(env.nS, env.nS);
      end
 
-     %fprintf('\n\n----------------------- n = %d\n\n', n);
+     if do_print, fprintf('\n\n----------------------- n = %d\n\n', n); end
 
      t = 1;
-     while env.s ~= env.ITI || s_prev == env.ITI % TODO kind of a hack -- use trial start instead
-         s_prev = env.s;
+     while ~env.ended % a bit hacky
+         % for bookkeeping only
+         s = env.s;
 
          % observe (redundant here; belief state already updated)
          o = env.o;
@@ -64,7 +67,8 @@ for n = 1:ntrials
              a = 1; % always run
          end
 
-         fprintf('in s, o = %d, %d; a = %d; b = [%s]\n', env.s, env.o, a, sprintf('%d,', b));
+         if do_print, fprintf('in s, o = %d, %d; a = %d; b = [%s]\n', env.s, env.o, a, sprintf('%.2f,', b)); end
+         if do_print, fprintf('             w = [%s]\n', sprintf('%.2f,', W(:,a)')); end
 
          % take action
          [env, ~, o_new, r] = next_fn(env, a);
@@ -81,19 +85,21 @@ for n = 1:ntrials
              nthoeu
          end
 
-         fprintf('   o_new = %d, r = %d; b_new = [%s]\n', o_new, r, sprintf('%d,', b_new));
+         if do_print, fprintf('   o_new = %d, r = %d; b_new = [%s]\n', o_new, r, sprintf('%.2f,', b_new)); end
 
          % pick best next action (for update)
          [~, a_new] = max(W' * b_new);
 
          % compute RPE
          RPE = r + gamma * (W(:,a_new)' * b_new) - W(:,a)' * b;
-         fprintf('   RPE = %f = %f + gamma * %f - %f\n', RPE,r,(W(:,a_new)' * b_new), W(:,a)' * b);
+         if do_print, fprintf('   RPE = %f = %f + gamma * %f - %f\n', RPE,r,(W(:,a_new)' * b_new), W(:,a)' * b); end
          if isnan(RPE) || isinf(RPE)
              ansoetu
          end
 
          % TD update
+         W0 = W;
+         assert(~episodic); % must be continuous, otherwise ITI value explodes, and so do all the rest
          if ~episodic || s ~= env.ITI % if episodic, don't accrue value in ITI
              W(:,a) = W(:,a) + alpha * RPE * b;
          end
@@ -101,26 +107,28 @@ for n = 1:ntrials
              natheou
          end
 
+         if do_print, fprintf('             w_new = [%s]\n', sprintf('%.2f,', W(:,a)')); end
+
          % move to next belief state
          b = b_new;
 
          % bookkeeping
          if r > 0
-             rewards(o) = rewards(o) + 1;
+             rewards(s) = rewards(s) + 1;
          end
-         visits(o) = visits(o) + 1;
+         visits(s) = visits(s) + 1;
 
          if n > ntrials * 0.9
              if r > 0
-                 post_RPEs(o) = post_RPEs(o) + RPE;
-                 post_RPE_cnts(o) = post_RPE_cnts(o) + 1;
+                 post_RPEs(s) = post_RPEs(s) + RPE;
+                 post_RPE_cnts(s) = post_RPE_cnts(s) + 1;
              else
-                 pre_RPEs(o) = pre_RPEs(o) + RPE;
-                 pre_RPE_cnts(o) = pre_RPE_cnts(o) + 1;
+                 pre_RPEs(s) = pre_RPEs(s) + RPE;
+                 pre_RPE_cnts(s) = pre_RPE_cnts(s) + 1;
              end
          end
 
-         fprintf('a, o = %d, %d\n', a, o);
+         if do_print, fprintf('a, o = %d, %d\n', a, o); end
 
          if env.omission
              B{2}(:,t) = b;

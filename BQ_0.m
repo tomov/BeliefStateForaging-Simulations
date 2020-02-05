@@ -105,7 +105,8 @@ for n = 1:ntrials
              natheou
          end
 
-         %{
+         %{ 
+         % to compare w/ clara's
          if r == 1
              fprintf('\n\n\n');
              fprintf('  RPE = %.4f\n', RPE);

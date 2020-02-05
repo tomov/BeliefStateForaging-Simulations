@@ -48,6 +48,7 @@ function env = estimate_env(init_fn, next_fn)
     O = zeros(env.nS, env.nA, env.nS);
     R = zeros(env.nS, env.nA, env.nS);
     for s = 1:env.nS
+
         for a = 1:env.nA
             for s_new = 1:env.nS
                 % T(s,a,s') = P(s'|s,a)

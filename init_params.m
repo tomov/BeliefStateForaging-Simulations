@@ -1,6 +1,7 @@
 function [frac_tr1, frac_pr, ITI_len, init_fn, next_fn, plot_fn, names] = init_params(name)
 
     switch name
+
         % original POMDP from Starkweather et al. 2017
 
         case 'clara_task_1_orig'

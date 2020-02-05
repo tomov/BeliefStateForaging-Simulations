@@ -12,9 +12,12 @@ function env = init_env_1(frac_pr, ITI_len, sigma)
     env.last_om = 20;
     env.ITI = 21;
 
-    env.ITI_len = ITI_len;
+    env.started = false;
+    env.ended = false;
 
     env.obs = [1:10 1:10 11]; % S->O mapping
+
+    env.ITI_len = ITI_len;
 
     env.nS = 21; % # states
     env.nA = 2; % # actions

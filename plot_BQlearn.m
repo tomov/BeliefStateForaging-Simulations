@@ -28,8 +28,8 @@ if isfield(env, 'track')
 end
 
 yh = max([h.YData W(:)'])*1.1;
-yh = 5.5;
-yl = -15.5;
+yh = 3.5;
+yl = -1.5;
 text(4, yh - 0.1, [names{1}, ' rewarded']);
 text(14, yh - 0.1, [names{1}, ' omission']);
 if isfield(env, 'track')

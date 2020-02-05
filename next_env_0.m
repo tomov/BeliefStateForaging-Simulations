@@ -5,9 +5,7 @@ function [env, s, o, r] = next_env_0(env, a)
     % track 2 only
 
     r = 0;
-    assert(a == 1 || a == 2);
-
-    a = 1; % force to be Pavlovian
+    assert(a == 1); % force to be Pavlovian
 
     if env.s == env.ITI
         % trial start
