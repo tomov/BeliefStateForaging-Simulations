@@ -3,7 +3,7 @@
 [frac_tr1, frac_pr, ITI_len, init_fn, next_fn, plot_fn, names] = init_params('clara_task_1_ITI');
 
 
-episodic = true;
+episodic = false;
 reset = false;
 pavlovian = true;
 
@@ -12,6 +12,8 @@ eps = 0.1;
 gamma = 0.9;
 
 ntrials = 10000;
+
+lesion = true;
 
 env = init_fn();
 
@@ -85,6 +87,11 @@ for n = 1:ntrials
          visits(o) = visits(o) + 1;
 
          if n > ntrials * 0.9
+
+             if lesion
+                 next_fn = @next_env_1_1; % simulate mPFC lesion at end of training by turning off rule for going into ITI observation after reward
+             end
+
              if r > 0
                  post_RPEs(o) = post_RPEs(o) + RPE;
                  post_RPE_cnts(o) = post_RPE_cnts(o) + 1;
