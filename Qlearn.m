@@ -1,6 +1,6 @@
 % episodic and continuous Q learning
 
-[frac_tr1, frac_pr, ITI_len, init_fn, next_fn, plot_fn, names] = init_params('track_2');
+[frac_tr1, frac_pr, ITI_len, init_fn, next_fn, plot_fn, names] = init_params('track_1');
 
 
 episodic = true;
@@ -13,7 +13,7 @@ gamma = 0.9;
 
 ntrials = 10000;
 
-lesion = false;
+lesion = true;
 
 env = init_fn();
 
@@ -71,7 +71,7 @@ for n = 1:ntrials
          end
 
          % TD update
-         if ~episodic || s ~= env.ITI % if episodic, don't accrue value in ITI TODO assumes agent can distinguish ITI!
+         if (~episodic || s ~= env.ITI) && (~lesion || n < ntrials*0.9) % if episodic, don't accrue value in ITI TODO assumes agent can distinguish ITI!
              Q(o,a) = Q(o,a) + alpha * RPE;
          end
 
